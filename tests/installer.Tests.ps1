@@ -71,6 +71,19 @@ Describe "Legacy Docker data discovery" {
         if ($volume -ne "") { throw "Expected no legacy volume, got $volume" }
     }
 
+    It "treats a missing legacy container as a clean installation" {
+        Mock docker {
+            $global:LASTEXITCODE = 1
+            Write-Error "Error: No such object: fgc-remaster"
+        } -ParameterFilter { $args[0] -eq "inspect" }
+        Mock Confirm-DefaultYes { throw "The migration prompt must not be shown" }
+
+        $threw = $false
+        try { Adopt-LegacyData } catch { $threw = $true }
+        if ($threw) { throw "A missing legacy container must not stop the launcher" }
+        Assert-MockCalled Confirm-DefaultYes -Times 0 -Exactly -Scope It
+    }
+
     It "replaces the legacy container while preserving its named data volume" {
         $launcher = Get-Content -LiteralPath "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Raw
         if ($launcher -notmatch '& docker stop fgc-remaster') { throw "Legacy container is not stopped" }

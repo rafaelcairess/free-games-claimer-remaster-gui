@@ -243,8 +243,17 @@ function Get-LegacyDataVolumeFromInspect([string]$Json) {
 }
 
 function Adopt-LegacyData {
-    $inspect = & docker inspect fgc-remaster 2>$null
-    if ($LASTEXITCODE -ne 0) { return }
+    # A missing legacy container is expected on a clean installation. PowerShell 7
+    # can promote native stderr to a terminating error while the launcher uses
+    # ErrorActionPreference=Stop, so allow this probe to fail normally.
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $inspect = & docker inspect fgc-remaster 2>$null
+        if ($LASTEXITCODE -ne 0) { return }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
     $legacy = (Get-LegacyDataVolumeFromInspect ($inspect -join [Environment]::NewLine)).Trim()
     if ($legacy -notmatch "^[A-Za-z0-9][A-Za-z0-9_.-]+$") { return }
     if ($legacy -eq (Get-EnvironmentValue "CLAIMER_DATA_VOLUME")) { return }
