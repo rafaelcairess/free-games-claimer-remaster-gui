@@ -1,8 +1,10 @@
-. "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Action start -Language en
-
 Describe "Claimer Control launcher flow" {
+    BeforeAll {
+        . "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Action start -Language en
+    }
+
     BeforeEach {
-        $Action = "start"
+        $script:Action = "start"
         Mock Test-Path { $true }
         Mock Wait-DockerDesktop {}
         Mock Start-Application {}
@@ -34,7 +36,7 @@ Describe "Claimer Control launcher flow" {
     }
 
     It "uses the local source flow from a repository checkout" {
-        $Action = "source"
+        $script:Action = "source"
         Mock Test-DockerCommandAvailable { $true }
         Invoke-ClaimerControl | Should Be 0
         Assert-MockCalled Start-SourceApplication -Times 1 -Exactly -Scope It
@@ -43,6 +45,10 @@ Describe "Claimer Control launcher flow" {
 }
 
 Describe "Legacy Docker data discovery" {
+    BeforeAll {
+        . "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Action start -Language en
+    }
+
     It "finds the named data volume without using a Docker format template" {
         $json = @'
 [
@@ -63,6 +69,10 @@ Describe "Legacy Docker data discovery" {
 }
 
 Describe "Local dashboard readiness" {
+    BeforeAll {
+        . "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Action start -Language en
+    }
+
     It "uses the explicit IPv4 loopback address" {
         Mock Invoke-WebRequest { [pscustomobject]@{StatusCode = 200} }
         Wait-Panel
