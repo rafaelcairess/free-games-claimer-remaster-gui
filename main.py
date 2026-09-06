@@ -22,12 +22,15 @@ import sys
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.base import STATE_PAUSED
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from src.core.config import cfg
+from src.core.config import cfg, settings_warnings
+from src.core.claimer import mask_account
 from src.core.database import init_db
-from src.core.updates import notify_if_update_available
+from src.core.selection import apply_run_selection
+from src.core.updates import get_update_status, notify_if_update_available
 from src.stores.aliexpress import claim_aliexpress
 from src.stores.epic import claim_epic
 from src.stores.epic_fab import claim_fab
@@ -35,10 +38,17 @@ from src.stores.gamerpower import claim_gamerpower
 from src.stores.gog import claim_gog
 from src.stores.prime import claim_prime
 from src.stores.steam import claim_steam
+from src.stores.unity import claim_unity
 from src.stores.ubisoft import claim_ubisoft
 from src.core.notifier import notify
-from src.gui.settings import SettingsError, get_settings, save_settings
-from src.gui.state import dashboard_state
+from src.gui.settings import (
+    SettingsError,
+    complete_setup,
+    get_settings,
+    get_setup_state,
+    save_settings,
+)
+from src.gui.state import dashboard_state, summarize_store_result
 from src.version import __version__, __author__, __repo__, __contributors__
 
 # ---------------------------------------------------------------------------
@@ -54,8 +64,8 @@ class StorePrefixFilter(logging.Filter):
     def filter(self, record):
         if record.name.startswith("fgc."):
             store = record.name.split(".")[-1]
-            if store in ("epic", "steam", "gog", "prime", "aliexpress", "ubisoft", "fab"):
-                store_map = {"gog": "GOG", "epic": "Epic", "steam": "Steam", "prime": "Prime", "aliexpress": "AliExpress", "ubisoft": "Ubisoft", "fab": "Fab"}
+            if store in ("epic", "steam", "gog", "prime", "aliexpress", "ubisoft", "fab", "unity"):
+                store_map = {"gog": "GOG", "epic": "Epic", "steam": "Steam", "prime": "Prime", "aliexpress": "AliExpress", "ubisoft": "Ubisoft", "fab": "Fab", "unity": "Unity"}
                 prefix = escape(f"[{store_map[store]}]")
                 # Prepend to the message template
                 record.msg = f"{prefix} {record.msg}"
@@ -110,13 +120,15 @@ ALL_CLAIMERS: dict[str, tuple[str, object]] = {
     "prime":      ("Prime Gaming", claim_prime),
     "gog":        ("GOG",          claim_gog),
     "ubisoft":    ("Ubisoft",      claim_ubisoft),
+    "unity":      ("Unity",        claim_unity),
     "gamerpower": ("GamerPower",   claim_gamerpower),
     "aliexpress": ("AliExpress",   claim_aliexpress),
 }
 
-# What runs when neither the CLI nor STORES names anything. GamerPower stays opt-in:
-# its sub-stores each need their own *_ENABLE flag anyway.
-DEFAULT_STORES: list[str] = ["steam", "epic", "fab", "prime", "gog", "ubisoft", "aliexpress"]
+# What runs when neither the CLI nor STORES names anything. GamerPower goes last so the
+# stores with their own module claim first and its database dedup can do its job.
+DEFAULT_STORES: list[str] = ["steam", "epic", "fab", "prime", "gog", "ubisoft",
+                             "aliexpress", "gamerpower"]
 
 # Display name (e.g. "Prime Gaming") → canonical store key (e.g. "prime").
 _DISPLAY_TO_KEY: dict[str, str] = {disp: key for key, (disp, _) in ALL_CLAIMERS.items()}
@@ -143,6 +155,8 @@ _ALIASES: dict[str, str] = {
     "gog":           "gog",
     "ubisoft":       "ubisoft",
     "ubi":           "ubisoft",
+    "unity":         "unity",
+    "unity-assets":  "unity",
     "gamerpower":    "gamerpower",
     "gp":            "gamerpower",
     "aliexpress":    "aliexpress",
@@ -225,6 +239,21 @@ def _resolve_stores(raw: list[str]) -> list[str]:
     return resolved
 
 
+def _warn_about_settings() -> None:
+    """Name the settings that do nothing, instead of ignoring them in silence (issue #40)."""
+    for line in settings_warnings():
+        name = line.split(" ", 1)[0].split("=", 1)[0]
+        hint = ""
+        if name.endswith("_ENABLE") and _ALIASES.get(name[:-7].lower()) in ALL_CLAIMERS:
+            hint = " Stores are chosen with STORES=..., there is no switch of its own for this one."
+        logger.warning("%s%s", line, hint)
+
+    unknown = sorted(cfg.notify_skip_stores - set(ALL_CLAIMERS))
+    if unknown:
+        logger.warning("NOTIFY_SKIP_STORES names %s, which is not a store, so nothing is silenced there. "
+                       "Valid: %s", ", ".join(unknown), ", ".join(ALL_CLAIMERS))
+
+
 def _get_active_claimers(requested_stores: list[str] | None = None) -> list[tuple[str, object]]:
     """Determine which claimers to run based on CLI args / STORES env var.
 
@@ -244,6 +273,8 @@ def _get_active_claimers(requested_stores: list[str] | None = None) -> list[tupl
     else:
         selected = list(DEFAULT_STORES)
 
+    # Published so GamerPower only delegates to stores this run actually starts.
+    apply_run_selection(selected)
     logger.debug("Store selection: cli=%s STORES=%r -> %s", cli_stores, cfg.stores, selected)
     return [(ALL_CLAIMERS[k][0], ALL_CLAIMERS[k][1]) for k in selected if k in ALL_CLAIMERS]
 
@@ -304,9 +335,8 @@ async def run_claimers(requested_stores: list[str] | None = None) -> None:
                 logger.debug("%s returned %d game entr(ies): %s", name, len(res.get("games") or []), res.get("games"))
             if isinstance(res, dict) and res.get("games"):
                 aggregated_results.append(res)
-            game_count = len(res.get("games") or []) if isinstance(res, dict) else 0
-            message = "Concluído sem novidades" if game_count == 0 else f"Concluído · {game_count} resultado(s)"
-            dashboard_state.finish_store(store_key, message)
+            message, details = summarize_store_result(store_key, res)
+            dashboard_state.finish_store(store_key, message, details=details)
         except Exception:
             logger.exception("✗ %s crashed", name)
             dashboard_state.finish_store(store_key, "Falha na última execução", failed=True)
@@ -377,7 +407,8 @@ async def run_claimers(requested_stores: list[str] | None = None) -> None:
                              result.get("store"), len(result["games"]))
                 continue
                 
-            header = f"**{result['store']}** ({result['user']}):" if result.get('user') else f"**{result['store']}**:"
+            account = mask_account(result.get('user'))
+            header = f"**{result['store']}** ({account}):" if account else f"**{result['store']}**:"
             msg_parts.append(f"{header}\n{format_game_list(relevant_games)}")
             
         if msg_parts:
@@ -456,6 +487,7 @@ async def main() -> None:
         sorted(cfg.notify_skip_stores) or "none", cfg.eg_mobile, ",".join(cfg.eg_mobile_platform_list) or "none",
         cfg._data_dir,
     )
+    _warn_about_settings()
     await init_db()
     logger.info("Database ready.")
 
@@ -510,18 +542,24 @@ async def main() -> None:
     logger.info("Waiting for virtual display to initialize...")
     await asyncio.sleep(3)
 
-    # Also run immediately on startup
-    if cfg.run_on_startup:
+    setup_pending = cfg.gui_setup_required and not get_setup_state()["complete"]
+
+    # The packaged Windows experience opens the local setup wizard before any
+    # account automation. Existing source/Docker users are unaffected unless
+    # they explicitly enable GUI_SETUP_REQUIRED.
+    if cfg.run_on_startup and not setup_pending:
         scheduler.add_job(
             run_claimers_scheduled,
             id="claim_all_startup",
             name="Initial claiming run",
             replace_existing=True,
         )
-    else:
+    elif not cfg.run_on_startup:
         logger.info("Initial claiming run disabled by RUN_ON_STARTUP=false.")
+    else:
+        logger.info("Initial claiming run paused until local setup is complete.")
 
-    scheduler.start()
+    scheduler.start(paused=setup_pending)
     dashboard_server = None
     if cfg.gui_enabled:
         from src.gui.server import start_dashboard
@@ -547,8 +585,20 @@ async def main() -> None:
             _configure_scheduled_jobs(scheduler)
             return result
 
+        async def dashboard_setup(values: dict) -> dict:
+            result = complete_setup(values)
+            _configure_scheduled_jobs(scheduler)
+            if scheduler.state == STATE_PAUSED:
+                scheduler.resume()
+            return result
+
+        async def dashboard_update() -> dict:
+            return await get_update_status()
+
         async def dashboard_run(stores: list[str] | None) -> bool:
             global _dashboard_run_task
+            if cfg.gui_setup_required and not get_setup_state()["complete"]:
+                raise SettingsError("Complete local setup before running", "error.setupRequired")
             if _claim_run_lock.locked() or (_dashboard_run_task and not _dashboard_run_task.done()):
                 return False
             if stores is not None:
@@ -567,6 +617,8 @@ async def main() -> None:
             status_callback=dashboard_status,
             config_callback=dashboard_config,
             save_callback=dashboard_save,
+            setup_callback=dashboard_setup,
+            update_callback=dashboard_update,
             run_callback=dashboard_run,
         )
     interval_text = (

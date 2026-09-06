@@ -14,7 +14,7 @@ from src.version import __version__
 
 RELEASE_JSON = {
     "tag_name": "v1.6",
-    "html_url": "https://github.com/P-Adamiec/Free-Games-Claimer-Remaster/releases/tag/v1.6",
+    "html_url": "https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/tag/v1.6",
     "name": "v1.6",
 }
 
@@ -79,7 +79,7 @@ class TestVersionParsing:
 class TestReleasesUrl:
     def test_built_from_the_repo_link(self):
         assert updates._releases_url() == (
-            "https://api.github.com/repos/P-Adamiec/Free-Games-Claimer-Remaster/releases/latest"
+            "https://api.github.com/repos/rafaelcairess/free-games-claimer-remaster-gui/releases/latest"
         )
 
 
@@ -89,7 +89,27 @@ class TestMessage:
         assert "v1.6" in message
         assert f"v{__version__}" in message
         assert RELEASE_JSON["html_url"] in message
-        assert "docker compose pull" in message
+        assert "Open Claimer Control" in message
+
+
+class TestDashboardUpdateStatus:
+    def test_reports_a_newer_release(self, monkeypatch):
+        _stub_release(monkeypatch, _release("99.0.0"))
+        status = asyncio.run(updates.get_update_status())
+
+        assert status["currentVersion"] == __version__
+        assert status["available"] is True
+        assert status["latestVersion"] == "99.0.0"
+        assert status["releaseUrl"] == RELEASE_JSON["html_url"]
+        assert status["checkFailed"] is False
+
+    def test_network_failure_is_safe_for_the_dashboard(self, monkeypatch):
+        _stub_release(monkeypatch, None)
+        status = asyncio.run(updates.get_update_status())
+
+        assert status["available"] is False
+        assert status["latestVersion"] is None
+        assert status["checkFailed"] is True
 
 
 class TestNotifyDecision:

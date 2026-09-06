@@ -206,6 +206,52 @@ _APP_BLOCK_JS = r"""
 """
 
 
+# A page that shipped its scripts but painted nothing: innerText stays empty while
+# textContent still holds the inline <script> source. No amount of waiting fixes it.
+DEAD_PAGE_RENDERED_MAX = 50
+DEAD_PAGE_SOURCE_MIN = 500
+
+
+def page_is_dead(health: dict) -> bool:
+    """True when AliExpress served the coin page but its app never rendered."""
+    inner = _as_int((health or {}).get("innerTextLen"))
+    source = _as_int((health or {}).get("textContentLen"))
+    if inner is None or source is None:
+        return False
+    return inner <= DEAD_PAGE_RENDERED_MAX and source >= DEAD_PAGE_SOURCE_MIN
+
+
+def today_from_payloads(payloads) -> dict:
+    """Today's check-in as the API reports it, which no translation can change.
+
+    ``coin.channel.sign.list`` marks today with ``calendarDayDistance`` 0; that node
+    carries ``signSuccess`` and today's coin prize.
+    """
+    out: dict = {"claimed": None, "coins": None}
+    for payload in payloads or []:
+        if "sign.list" not in str((payload or {}).get("api") or ""):
+            continue
+        try:
+            data = (json.loads(payload["body"]).get("data") or {}).get("data") or {}
+            nodes = [n for seq in (data.get("signQuerySequenceNodeList") or [])
+                     for n in (seq.get("dailySignNodeList") or [])]
+        except Exception:
+            continue
+        for node in nodes:
+            if node.get("calendarDayDistance") != 0:
+                continue
+            result = (node.get("signResultList") or [{}])[0]
+            if "signSuccess" in result:
+                out["claimed"] = bool(result.get("signSuccess"))
+            coins = next((_as_int(p.get("prizeAmount")) for p in (result.get("prizeInfoList") or [])
+                          if p.get("prizeType") == "coins"), None)
+            if coins is not None:
+                out["coins"] = coins
+            if out["claimed"] is not None or out["coins"] is not None:
+                return out
+    return out
+
+
 class AliExpressClaimer(BaseClaimer):
     store_name = "aliexpress"
 
@@ -218,6 +264,7 @@ class AliExpressClaimer(BaseClaimer):
         self._user_coins: int | None = None
         self._coin_reqs: dict = {}  # requestId -> response metadata for coin/check-in mtop calls
         self._coin_payloads: list[dict] = []  # flattened coin/check-in responses (streak, tomorrow, balance)
+        self.checkin_summary: dict = {}
         self._coin_network_session = None  # CDP session where Network was enabled
 
     async def run(self) -> None:
@@ -1358,6 +1405,43 @@ class AliExpressClaimer(BaseClaimer):
         except Exception:
             pass
 
+    async def _page_health(self) -> dict:
+        """How much of the coin page actually rendered, versus how much source it carries."""
+        try:
+            raw = await self.page.evaluate(
+                "(() => { const b = document.body; return JSON.stringify({"
+                " innerTextLen: b ? (b.innerText || '').length : -1,"
+                " textContentLen: b ? (b.textContent || '').length : -1}); })()")
+            return json.loads(raw) if isinstance(raw, str) else {}
+        except Exception as e:
+            self.logger.debug("Could not measure the page: %s", e)
+            return {}
+
+    async def _find_collect_by_coins(self, coins: int) -> str | None:
+        """Find the collect button by the coin count the API reported, in any language."""
+        try:
+            raw = await self.page.evaluate(r"""
+                (() => {
+                    const want = %d;
+                    const vis = el => !!el && el.offsetParent !== null;
+                    const els = [...document.querySelectorAll('button, div[role="button"], span, a')];
+                    for (const el of els) {
+                        const t = (el.textContent || '').trim();
+                        if (!t || t.length > 30 || !vis(el)) continue;
+                        const nums = (t.match(/\d+/g) || []).map(Number);
+                        // One label, one number, and it is exactly today's reward.
+                        if (nums.length === 1 && nums[0] === want && /[^\d\s+]/.test(t)) return t;
+                    }
+                    return null;
+                })()
+            """ % int(coins))
+            if raw:
+                self.logger.debug("Collect button found by its coin count (%s): %r", coins, raw)
+            return str(raw) if raw else None
+        except Exception as e:
+            self.logger.debug("Coin-count button lookup failed: %s", e)
+            return None
+
     async def _read_checkin_state(self) -> dict:
         """Read today's check-in state from the coin page.
 
@@ -1703,6 +1787,26 @@ class AliExpressClaimer(BaseClaimer):
             "status": status,
         })
 
+    def _set_checkin_summary(
+        self,
+        outcome: str,
+        *,
+        claimed_coins=None,
+        offered_coins=None,
+        info: dict | None = None,
+        balance=None,
+    ) -> None:
+        """Keep structured, non-sensitive check-in data for the local dashboard."""
+        info = info or {}
+        self.checkin_summary = {
+            "outcome": outcome,
+            "claimedCoins": _as_int(claimed_coins),
+            "offeredCoins": _as_int(offered_coins),
+            "balance": _as_int(balance),
+            "streakDays": _as_int(info.get("streak")),
+            "tomorrowCoins": _as_int(info.get("tomorrow")),
+        }
+
     async def _rewarm_to_coins(self) -> None:
         """Re-approach the coin page organically (home → activity → coins).
 
@@ -1779,8 +1883,34 @@ class AliExpressClaimer(BaseClaimer):
         # Read the coin/check-in API captured in-page (balance + diagnostic fields).
         await self._read_coin_api()
 
+        # AliExpress has been answering browsers with a coin page that ships its scripts
+        # and then renders nothing. One fresh approach covers a page that merely stalled,
+        # anything beyond that is half an hour spent on a page that will not come back.
+        health = await self._page_health()
+        for attempt in range(1, max(0, cfg.ae_page_retries) + 1):
+            if not page_is_dead(health):
+                break
+            self.logger.warning(
+                "The coin page rendered nothing (%s of %s characters), approaching it once more "
+                "(%d/%d).", health.get("innerTextLen"), health.get("textContentLen"),
+                attempt, max(0, cfg.ae_page_retries))
+            await self._rewarm_to_coins()
+            await self._read_coin_api()
+            health = await self._page_health()
+
+        if page_is_dead(health):
+            self.logger.error(
+                "AliExpress served an empty coin page (%s of %s characters rendered), so the check-in "
+                "could not be read this time. This comes and goes: the same page works in other runs. "
+                "Collect in the mobile app if it keeps happening.",
+                health.get("innerTextLen"), health.get("textContentLen"))
+            await self._dump_failure_state()
+            self._report("coin page did not render this run")
+            return
+
         if cfg.dryrun:
             self.logger.info("DRYRUN – skipped AliExpress coin check-in.")
+            self._set_checkin_summary("available", balance=self._user_coins)
             self._report("available (dry run)")
             return
 
@@ -1791,14 +1921,28 @@ class AliExpressClaimer(BaseClaimer):
         collect_ready = False
         for attempt in range(1, attempts + 1):
             state = await self._wait_for_checkin_state(timeout=20)
+            today = today_from_payloads(self._coin_payloads)
             coins = state.get("todayCoins")
+            if coins is None:
+                coins = today.get("coins")
 
-            if state.get("claimed"):
+            if state.get("claimed") or today.get("claimed"):
                 self.logger.info(
-                    "✨ Daily check-in already claimed today ('%s' detected).",
-                    state.get("earnText") or "Earn more coins")
+                    "✨ Daily check-in already claimed today (%s).",
+                    state.get("earnText") or "confirmed by the check-in API")
+                info = await self._read_checkin_info()
+                self._set_checkin_summary(
+                    "already_collected", info=info, balance=self._user_coins,
+                )
                 self._report("already claimed today ✨")
                 return
+
+            # The DOM read knows English and Polish labels only, so when it finds nothing
+            # the button is looked up by the coin count the API just reported.
+            if not state.get("btnText") and today.get("claimed") is False and coins:
+                label = await self._find_collect_by_coins(coins)
+                if label:
+                    state = {**state, "btnText": label, "todayCoins": coins}
 
             if state.get("btnText") and (coins is None or coins >= min_coins):
                 self.logger.info(
@@ -1875,8 +2019,9 @@ class AliExpressClaimer(BaseClaimer):
             if await self._click_collect(state["btnText"]):
                 await self._human_pause(2.5, 4.5)
                 after = await self._read_checkin_state()
-                if after.get("claimed") or not after.get("btnText"):
-                    await self._read_coin_api()  # refresh balance after collect
+                await self._read_coin_api()  # refresh the balance and the check-in calendar
+                confirmed = today_from_payloads(self._coin_payloads).get("claimed")
+                if after.get("claimed") or confirmed or not after.get("btnText"):
                     info = await self._read_checkin_info()
                     # Prefer the freshest balance from the API; if it didn't
                     # refetch, estimate the new total from the pre-collect
@@ -1886,6 +2031,13 @@ class AliExpressClaimer(BaseClaimer):
                         total = bal_before + claimed_coins
                     status = self._format_checkin_status(claimed_coins, info, total)
                     self.logger.info("✅ AliExpress coins collected! (%s)", status)
+                    self._set_checkin_summary(
+                        "collected",
+                        claimed_coins=claimed_coins,
+                        offered_coins=claimed_coins,
+                        info=info,
+                        balance=total,
+                    )
                     self._report(status)
                     await self.sleep(3)
                     return
@@ -1901,6 +2053,9 @@ class AliExpressClaimer(BaseClaimer):
             self.logger.error(
                 "🚫 Session flagged as low-trust: only %s coin(s) offered instead of the "
                 "full amount, NOT collecting (policy). Collect on your phone to keep the streak.", coins)
+            self._set_checkin_summary(
+                "not_collected", offered_coins=coins, balance=self._user_coins,
+            )
             self._report(f"⚠️ flagged, only {coins} coin(s) offered, not collected 🚫")
             if cfg.notify_claim_fails:
                 await self.notify(
@@ -1924,8 +2079,10 @@ class AliExpressClaimer(BaseClaimer):
             self.logger.error("⚠️ AliExpress check-in widget did not render, offering manual VNC collection.")
 
         async def _collected_manually() -> bool:
-            st = await self._read_checkin_state()
-            return bool(st.get("claimed"))
+            if (await self._read_checkin_state()).get("claimed"):
+                return True
+            await self._read_coin_api()
+            return bool(today_from_payloads(self._coin_payloads).get("claimed"))
 
         detail = (
             "The coin API loaded today's offer, but the bot could not detect its button. "
@@ -1938,9 +2095,21 @@ class AliExpressClaimer(BaseClaimer):
             info = await self._read_checkin_info()
             status = self._format_checkin_status(state.get("todayCoins"), info, self._user_coins)
             self.logger.info("✅ Collected manually via VNC. (%s)", status)
+            self._set_checkin_summary(
+                "collected_manual",
+                claimed_coins=state.get("todayCoins"),
+                offered_coins=state.get("todayCoins"),
+                info=info,
+                balance=self._user_coins,
+            )
             self._report(status.replace("claimed", "claimed manually via VNC", 1))
         else:
             self.logger.error("⚠️ Still not collected after VNC wait, streak may break.")
+            self._set_checkin_summary(
+                "not_collected",
+                offered_coins=state.get("todayCoins"),
+                balance=self._user_coins,
+            )
             self._report("⚠️ NOT collected, widget did not render")
 
 
@@ -1948,4 +2117,9 @@ async def claim_aliexpress() -> dict:
     """Convenience entry point for AliExpress daily check-in."""
     claimer = AliExpressClaimer()
     await claimer.run()
-    return {"store": "AliExpress", "user": claimer.user, "games": claimer.notify_games}
+    return {
+        "store": "AliExpress",
+        "user": claimer.user,
+        "games": claimer.notify_games,
+        "checkin": claimer.checkin_summary,
+    }

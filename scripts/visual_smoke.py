@@ -1,0 +1,78 @@
+"""Run a sanitized browser smoke test against the local documentation preview."""
+
+from __future__ import annotations
+
+import json
+import os
+
+import nodriver as uc
+
+
+URL = os.environ.get("CLAIMER_PREVIEW_URL", "http://host.docker.internal:8765")
+LOCALES = ("en", "pt-BR", "es")
+
+
+async def click(page, selector: str) -> None:
+    await page.evaluate(f"document.querySelector({selector!r}).click()")
+    await page.sleep(0.1)
+
+
+async def check_locale(page, locale: str) -> None:
+    await page.evaluate(
+        f"localStorage.setItem('claimer-control-language', {locale!r}); location.reload()"
+    )
+    await page.sleep(0.5)
+    result = json.loads(await page.evaluate("""
+      JSON.stringify({
+        lang: document.documentElement.lang,
+        title: document.querySelector('.setup-page-header h2')?.textContent.trim(),
+        fits: document.documentElement.scrollWidth <= window.innerWidth
+      })
+    """))
+    assert result["lang"] == locale
+    assert result["title"]
+    assert result["fits"]
+
+    for _ in range(3):
+        await click(page, "#setupNext")
+    await click(page, ".help-button")
+    tooltip = json.loads(await page.evaluate("""
+      JSON.stringify((() => {
+        const button = document.querySelector('.help-button');
+        const tip = document.getElementById(button.getAttribute('aria-describedby'));
+        button.focus();
+        return {
+          expanded: button.getAttribute('aria-expanded'),
+          role: tip?.getAttribute('role'),
+          text: tip?.textContent.trim(),
+          visible: getComputedStyle(tip).visibility === 'visible',
+          fits: document.querySelector('#onboardingContent').scrollWidth <=
+            document.querySelector('#onboardingContent').clientWidth
+        };
+      })())
+    """))
+    assert tooltip["expanded"] == "true"
+    assert tooltip["role"] == "tooltip"
+    assert tooltip["text"]
+    assert tooltip["visible"]
+    assert tooltip["fits"]
+
+
+async def main() -> None:
+    for viewport in ("1440,900", "390,844"):
+        browser = await uc.start(
+            headless=True,
+            browser_args=[f"--window-size={viewport}", "--force-device-scale-factor=1"],
+        )
+        try:
+            page = await browser.get(URL)
+            await page.sleep(0.5)
+            for locale in LOCALES:
+                await check_locale(page, locale)
+        finally:
+            browser.stop()
+    print("Visual smoke test passed for en, pt-BR and es at desktop and mobile widths.")
+
+
+if __name__ == "__main__":
+    uc.loop().run_until_complete(main())

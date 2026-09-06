@@ -1,29 +1,50 @@
-# free-games-claimer-remaster
+# Claimer Control
 
 <p align="center">
-  <img alt="logo-free-games-claimer" src="https://user-images.githubusercontent.com/493741/214588518-a4c89998-127e-4a8c-9b1e-ee4a9d075715.png" />
+  <strong>A local control panel that collects free games and AliExpress daily coins for you.</strong><br>
+  <sub>The dashboard, account settings and browser sessions stay on your computer.</sub>
 </p>
 
-> **Not a fork** – a complete ground-up Python remaster inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). 
->
-> ℹ️ **Are you coming from the original Node.js version?**  
-> For a comprehensive, file-by-file breakdown of what changed, dropped features, stealth automation upgrades, and architectural differences, **please read [MODIFICATIONS.md](./MODIFICATIONS.md).**
+<p align="center">
+  <a href="./README.md">English</a> ·
+  <a href="./docs/README.pt-BR.md">Português do Brasil</a> ·
+  <a href="./docs/README.es.md">Español</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest/download/Claimer-Control-Setup.exe"><strong>Download for Windows</strong></a>
+  · <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest">Release notes &amp; SHA-256</a>
+</p>
+
+> [!IMPORTANT]
+> Claimer Control does not operate a credential server and includes no telemetry. Credentials entered in the local dashboard are stored in your local Docker volume and are sent only by the automated browser to each store's official login. See [Security](#security-and-credentials).
+
+Claimer Control is maintained by [Rafael Caires](https://github.com/rafaelcairess) and built on [P-Adamiec/Free-Games-Claimer-Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster), an independent Python rewrite inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). Original attribution and the AGPL-3.0 license are preserved.
 
 Automatically claims free games on:
 
 - <img alt="logo steam" src="https://store.steampowered.com/favicon.ico" width="20" align="middle" /> **Steam** – via [SteamDB](https://steamdb.info/upcoming/free/) scraping (only *Free to Keep*, not *Play for Free*)
 - <img alt="logo epic-games" src="https://github.com/user-attachments/assets/82e9e9bf-b6ac-4f20-91db-36d2c8429cb6" width="20" align="middle" /> **Epic Games Store** – weekly free games, including the weekly free Android/iOS mobile game (`EG_MOBILE`)
 - <img alt="logo fab" src="https://www.google.com/s2/favicons?domain=fab.com&sz=64" width="20" align="middle" /> **Fab** – Epic's asset marketplace
+- <img alt="logo unity" src="https://www.google.com/s2/favicons?domain=unity.com&sz=64" width="20" align="middle" /> **Unity Asset Store** – the weekly free [Publisher of the Week](https://assetstore.unity.com/publisher-sale) asset, coupon and all (opt-in, add `unity` to `STORES`)
 - <img alt="logo prime-gaming" src="https://github.com/user-attachments/assets/7627a108-20c6-4525-a1d8-5d221ee89d6e" width="20" align="middle" /> **Amazon Prime Gaming** – monthly Prime Gaming catalogue + GOG key redemption
 - <img alt="logo gog" src="https://github.com/user-attachments/assets/49040b50-ee14-4439-8e3c-e93cafd7c3a5" width="20" align="middle" /> **GOG** – periodic free giveaways
 - <img alt="logo ubisoft" src="https://www.ubisoft.com/favicon.ico" width="20" align="middle" /> **Ubisoft** – free game giveaways from [ubisoft.com/games/free](https://www.ubisoft.com/en-us/games/free) (giveaways only, never trials, demos or free weekends)
-- <img alt="logo aliexpress" src="https://www.aliexpress.com/favicon.ico" width="20" align="middle" /> **AliExpress** – automated daily check-in that collects coins, using a real-device mobile fingerprint to stay undetected and reading the balance from the coin API
+- <img alt="logo aliexpress" src="https://www.aliexpress.com/favicon.ico" width="20" align="middle" /> **AliExpress** – automated daily check-in that collects coins, using a real-device mobile fingerprint to stay undetected and reading the balance from the coin API. The coin page sometimes arrives empty; the bot gives it one more approach, then reports it and moves on instead of retrying for half an hour (see [Troubleshooting](#troubleshooting))
 
-**Gamerpower API** routing to indirect stores (Still under development):
+**GamerPower API**, on by default, finds giveaways the stores themselves do not advertise, then hands each one to the matching store above. It routes to these extra sites too, each behind its own switch (still under development):
 - <img alt="logo fanatical" src="https://www.fanatical.com/favicon.ico" width="20" align="middle" /> **Fanatical** – auto-bypasses cookie banners and hooks Steam accounts to grab weekly PC drops.
-- <img alt="logo itchio" src="https://itch.io/favicon.ico" width="20" align="middle" /> **Itch.io** – DRM-free indie giveaways
+- <img alt="logo itchio" src="https://itch.io/favicon.ico" width="20" align="middle" /> **Itch.io** – DRM-free indie giveaways, claimed to your library and verified there (needs `ITCHIO_ENABLE=true`; with two-factor sign-in the bot asks you for the code over VNC)
 - <img alt="logo indiegala" src="https://www.indiegala.com/favicon.ico" width="20" align="middle" /> **IndieGala** – free Steam keys & DRM-free games
 - <img alt="logo alienware" src="https://www.alienwarearena.com/favicon.ico" width="20" align="middle" /> **Alienware Arena** – (Notify-only) ARP point giveaways
+
+> [!TIP]
+> **There is more free stuff out there than the storefronts show you.** Epic advertises two games a week
+> on its front page, but GamerPower regularly lists half a dozen more that are free right now on the very
+> same account, and other stores are no different. That is why `gamerpower` runs by default: it only ever
+> claims on stores you already run, so if `STORES=steam,gamerpower` it will take the Steam giveaways and
+> leave the Epic ones alone. The extra sites (Fanatical, Itch.io, IndieGala, Alienware Arena) stay off
+> until you set their own `*_ENABLE` switch.
 
 Runs as a Docker container with a built-in scheduler (every 12 hours by default, with optional fixed daily run times). Login via **VNC in browser** or automated credentials.
 
@@ -31,17 +52,27 @@ Runs as a Docker container with a built-in scheduler (every 12 hours by default,
 
 ## Quick start
 
-### Prerequisites
+### Windows — recommended
+
+1. Download **[Claimer-Control-Setup.exe](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest/download/Claimer-Control-Setup.exe)** from the latest Release.
+2. Run the installer. If Docker Desktop is missing, Claimer Control explains why it is needed and installs it from Docker's official source after your confirmation.
+3. The local dashboard opens automatically. Follow the six-step setup wizard, choose your stores and optionally enter account credentials.
+
+The installer may request administrator permission and a Windows restart while Docker is installed. It resumes after sign-in, creates desktop and Start menu shortcuts, and can start Claimer Control with Windows. The application installer is currently unsigned, so Windows SmartScreen may show an unknown-publisher warning. Verify `SHA256SUMS.txt` from the same Release before continuing.
+
+### Linux, NAS or source installation
+
+#### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
 
 > 🟢 **New to Docker on Windows?** Read the step-by-step [**WINDOWS_BEGINNER_GUIDE.md**](./WINDOWS_BEGINNER_GUIDE.md) to set up Docker Desktop, optimize RAM limits, and use Dockhand to deploy this flawlessly.
 
-### 1. Clone and configure
+#### 1. Clone and configure
 
 ```bash
-git clone https://github.com/P-Adamiec/free-games-claimer-remaster.git
-cd free-games-claimer-remaster
+git clone https://github.com/rafaelcairess/free-games-claimer-remaster-gui.git
+cd free-games-claimer-remaster-gui
 cp .env.example .env  # or edit the existing .env
 ```
 
@@ -76,11 +107,11 @@ AE_PASSWORD=your_password
 DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
 
 # Run only specific stores (comma-separated)
-# Leave commented to run the defaults (everything except gamerpower)
+# Leave commented to run the defaults (everything except unity)
 # STORES=steam,prime,gog
 ```
 
-### 2. Run container
+#### 2. Run container
 
 ```bash
 docker compose up -d
@@ -89,19 +120,17 @@ docker compose up -d
 When running directly from a source checkout after changing or updating the
 code, rebuild the local image first with `docker compose up -d --build app`.
 
-On Windows, you can instead double-click `Start-FGC-Control-Center.cmd`. The
-launcher starts Docker Desktop when necessary, starts the Compose service, and
-opens the local dashboard automatically.
+On Windows source checkouts, you can double-click `Start-Claimer-Control.cmd`.
 
-> 💡 **Want to test experimental development features?** Add `FGC_TAG=dev` to your `.env` file before running Docker to automatically download our pre-release build!
+> 💡 **Need a reproducible version?** Set `CLAIMER_TAG` to a published tag such as `v1.0.0` before starting Docker.
 
-### 3. Login (first run)
+#### 3. Login (first run)
 
 Open **http://localhost:7080** in your browser to access the VNC session.
 
 Each store will wait for you to login manually on the first run if you don't supply credentials. After that, session cookies are natively restored using persistent browser profiles!
 
-### Local dashboard
+#### Local dashboard
 
 Open **http://localhost:8080** to see each store's status, start all stores or
 just one store, open the browser session, and edit the supported settings.
@@ -112,12 +141,68 @@ leave a secret field blank to keep its current value. The Compose configuration
 binds this port to `127.0.0.1` by default, so the dashboard is available only on
 the computer running Docker. Do not expose port 8080 directly to the internet.
 
-### 4. Monitor
+On the packaged Windows install, the first opening shows a guided setup for language, privacy, stores, optional credentials and scheduling. Select **English**, **Português do Brasil** or **Español**, or keep the language detected from Windows and your browser. Every credential field has an accessible `?` explanation and supports manual login as an alternative.
+
+#### 4. Monitor
 
 To see what the bot is doing in real-time regardless of your current terminal folder, inspect the container directly:
 ```bash
 docker logs -f fgc-remaster
 ```
+
+## Security and credentials
+
+| Question | Answer |
+|---|---|
+| Does Claimer Control receive my passwords? | No. There is no Claimer Control or Rafael Caires server receiving dashboard data. |
+| Where are credentials saved? | In `gui.env` inside the local Docker volume, with restricted file permissions. |
+| Do credentials ever leave the computer? | Only when the automated browser sends them directly to the official store login, exactly as a normal browser must. |
+| Can the dashboard read saved passwords back? | No. Its API returns only whether each secret is configured. |
+| Is the dashboard public? | No. Docker binds it to `127.0.0.1` by default. Do not expose port 8080 to the internet. |
+| Is there telemetry? | No. External traffic is limited to stores, notifications you configure and update checks. |
+
+Account credentials are optional. You may leave them blank, open the visual browser, and sign in manually. Browser profiles persist locally, so most stores can reuse that session later. Protect your Windows account and disk: locally stored browser sessions and secrets are sensitive data.
+
+## Product tour
+
+All screenshots use synthetic accounts and sample results. No real account, token, cookie or local path is shown.
+
+| First-time setup | Local security |
+|---|---|
+| ![Choose a language](docs/images/01-language.png) | ![Understand local data storage](docs/images/02-security.png) |
+
+| Choose stores | Understand credential fields |
+|---|---|
+| ![Choose enabled stores](docs/images/03-stores.png) | ![Credential explanation tooltip](docs/images/04-credentials.png) |
+
+| Run dashboard | AliExpress coins |
+|---|---|
+| ![Dashboard with game results](docs/images/05-dashboard.png) | ![AliExpress balance and streak](docs/images/06-aliexpress.png) |
+
+| Scheduling | Manual browser login |
+|---|---|
+| ![Configure scheduling](docs/images/07-schedule.png) | ![Open the local visual browser](docs/images/08-browser.png) |
+
+### 5. Unity, first run only
+
+Unity is opt-in (`STORES=...,unity`) and its checkout refuses the free coupon until your Unity account
+carries a complete billing address. That is the one thing the bot cannot invent for you, so on the first
+claim it opens the checkout, pings you the same way it does for a login, and waits **5 minutes**:
+
+1. Open the VNC session and fill in what it names as missing: first name, last name, address, postal code and city.
+2. Answer **"Are you exempt from paying consumption tax?"** with **No**, unless you genuinely have a tax number. With one on the account, the bot leaves that section alone.
+3. Leave the page as it is, the bot applies the coupon and finishes the claim in the same session.
+
+Unity keeps this on your account, so every later week runs unattended. Missing the window is not a
+failure: the asset is reported as `skipped:setup`, the rest of the run carries on, and the next run tries
+again (each giveaway lasts a week).
+
+> [!NOTE]
+> **The claim is written for Unity's checkout in English**, which is what the bot's browser profile asks
+> for. It finds the coupon box, the total and the confirm button by their English labels. If your account
+> forces another language onto the checkout, the bot cannot read the amount, so it refuses to confirm the
+> order and reports the asset as not claimed. It never pays in that state: the only thing it ever confirms
+> is a total of exactly zero. Set the Asset Store language back to English and the claim works again.
 
 ---
 
@@ -127,11 +212,14 @@ Options are set via environment variables in `.env`:
 
 | Variable | Default | Description |
 |---|---|---|
-| `FGC_TAG` | `latest` | Docker image tag to run (set to `dev` to test experimental pre-release builds). |
+| `CLAIMER_TAG` | `latest` | Claimer Control image tag. The Windows updater pins this to the selected Release. |
 | `SHOW` | `1` | Show browser window (VNC). |
 | `WIDTH` | `1280` | Browser/VNC screen width. |
 | `HEIGHT` | `720` | Browser/VNC screen height. |
 | `NOVNC_PORT` | `7080` | noVNC web access port. |
+| `GUI_ENABLED` | `true` | Enable the local control dashboard. |
+| `GUI_PORT` | `8080` | Host port for the local dashboard, bound to `127.0.0.1` by Docker Compose. |
+| `GUI_SETUP_REQUIRED` | `false` | Pause automatic runs until the local onboarding wizard is complete. Enabled by the Windows installer. |
 | `VNC_IP` | `localhost`| Host for VNC notification links. Alerts include a one-click `http://<VNC_IP>:<NOVNC_PORT>/?autoconnect=true`. |
 | `VNC_URL` | | Full public noVNC address for notification links, e.g. `https://fgc.example.tld`. Use it behind a reverse proxy: it keeps your scheme and drops the port, replacing `VNC_IP` and `NOVNC_PORT` in the link (`NOVNC_PORT` still publishes the container port). |
 | `VNC_PASSWORD` | | Optional password for VNC access (empty = no password). |
@@ -164,6 +252,9 @@ Options are set via environment variables in `.env`:
 | `STEAM_USERNAME` | | Steam username. |
 | `STEAM_PASSWORD` | | Steam password. |
 | `FAB_ACCEPT_EULA` | `true` | Let the bot accept Fab's licence agreement and the EU right-of-withdrawal waiver, both required to claim. Set to `false` to stop before them. Fab reuses `EG_EMAIL` / `EG_PASSWORD` / `EG_OTPKEY`. |
+| `UNITY_EMAIL` | | Unity Asset Store login email. |
+| `UNITY_PASSWORD` | | Unity Asset Store password. |
+| `UNITY_ACCEPT_TOS` | `true` | Accept the Asset Store EULA and the 14-day withdrawal waiver at Unity's checkout. Set to `false` to stop before them and be notified instead. |
 | `UBI_EMAIL` | | Ubisoft Connect login email. |
 | `UBI_PASSWORD` | | Ubisoft Connect password. |
 | `UBI_OTPKEY` | | Ubisoft authenticator (TOTP) secret, for accounts with two-step verification. |
@@ -172,8 +263,10 @@ Options are set via environment variables in `.env`:
 | `AE_MIN_COINS` | `2` | Skip the daily check-in when it offers fewer coins than this (protects against the 1-coin bot-flag state). |
 | `AE_FLAG_RETRIES` | `3` | How many times to wait and re-approach the coin page when the offer is capped. |
 | `AE_FLAG_WAIT` | `480` | Seconds to wait between retries (kept above AliExpress' ~7-min penalty so one wait clears it). |
-| `STORES` | *(see note)* | Comma-separated list of stores to run. Empty runs `steam`, `epic`, `fab`, `prime`, `gog`, `ubisoft`, `aliexpress`; add `gamerpower` here to enable it too. |
+| `AE_PAGE_RETRIES` | `4` | How many extra approaches to make when the coin page loads but renders nothing. AliExpress serves it empty most of the time (measured: one usable page in eight looks), so each retry is a real chance at the daily check-in. `0` gives up on the first look. |
+| `STORES` | *(see note)* | Comma-separated list of stores to run. Empty runs `steam`, `epic`, `fab`, `prime`, `gog`, `ubisoft`, `aliexpress`, `gamerpower`; add `unity` here to enable it too. GamerPower only delegates to the stores in this list, so `steam,gamerpower` skips its Epic giveaways. |
 | `RESET_DB_GAMES` | `false` | Retroactively erase any database claims recorded within the last 7 days upon execution. Assists in clearing false positives. |
+| `GP_CLAIM_DLC` | `false` | Also process GamerPower's in-game DLC giveaways. Off by default: most need an account in that specific game, and they are the bulk of the feed. |
 | `FANATICAL_ENABLE`| `false`| Enable Fanatical claiming via GamerPower. |
 | `FANATICAL_EMAIL` | | Fanatical account email. |
 | `FANATICAL_PASSWORD`| | Fanatical account password. |
@@ -181,6 +274,8 @@ Options are set via environment variables in `.env`:
 | `ITCHIO_ENABLE`| `false`| Enable Itch.io claiming via GamerPower. |
 | `ITCHIO_EMAIL` | | Itch.io account email. |
 | `ITCHIO_PASSWORD` | | Itch.io account password. |
+| `ITCHIO_OTP_ENABLE` | `false` | Allow the bot to spend an Itch.io recovery code. Authenticator codes are never stored: for those the bot asks you over VNC. |
+| `ITCHIO_OTP_CODES` | | Comma-separated Itch.io recovery codes, used one per login and recorded in `data/used_itchio_codes.txt` so none is sent twice. |
 | `INDIEGALA_ENABLE`| `false`| Enable IndieGala claiming via GamerPower. |
 | `INDIEGALA_EMAIL` | | IndieGala account email. |
 | `INDIEGALA_PASSWORD`| | IndieGala account password. |
@@ -236,7 +331,7 @@ The application supports three scheduling modes: running on a recurring interval
 
 ### Selective module execution
 
-Run only specific stores using accepted module aliases (`steam`, `epic`, `prime`, `gog`, `amazon`, `ubisoft`/`ubi`, `fab`, `aliexpress`/`ae`, `gamerpower`/`gp`):
+Run only specific stores using accepted module aliases (`steam`, `epic`, `prime`, `gog`, `amazon`, `ubisoft`/`ubi`, `fab`, `unity`, `aliexpress`/`ae`, `gamerpower`/`gp`):
 
 ```bash
 # Method 1: Via environment variable (recommended)
@@ -249,48 +344,70 @@ STORES=epic,gog docker compose up -d
 docker compose run --rm app python main.py steam gog --once
 ```
 
+To skip a store, list the ones you want and leave that one out. There is no `STEAM_ENABLE` style switch
+for the stores above, and a setting the bot does not read is now named at startup instead of being
+ignored in silence. For example `STORES=epic,fab,prime,gog,ubisoft,aliexpress,gamerpower` runs everything
+except Steam, and GamerPower then leaves its Steam giveaways alone too, naming each one it skips in the
+log. Giveaways that hand out a Steam key (Fanatical, IndieGala) are a different thing: when you enable
+those sites the key lands in your notification and in the database, and the bot never signs in to Steam
+to redeem it.
+
 ---
 
 ## Architecture
 
 ```
-free-games-claimer-remaster/
-├── main.py                 # Entry point + scheduler + CLI
+claimer-control/
+├── main.py                 # Entry point + scheduler + CLI + run summary
 ├── docker-compose.yml      # Container configuration
-├── Dockerfile              # Ubuntu + Chrome + TurboVNC + Python
+├── installer/              # Localized Windows launcher + Inno Setup package
+├── Dockerfile              # Debian bookworm-slim + Chrome/Chromium + TurboVNC + noVNC
+├── docker-entrypoint.sh    # Starts the virtual display, VNC and the bot
+├── requirements.txt        # Python dependencies
+├── CHANGELOG.md            # What changed in every release
 ├── MODIFICATIONS.md        # Codebase overhaul technical reference
 ├── WINDOWS_BEGINNER_GUIDE.md
 ├── .env                    # Your local configuration (gitignored)
 ├── .env.example            # Configuration template
-└── src/
-    ├── version.py          # Version string
-    ├── core/               # Shared engine components
-    │   ├── claimer.py      # BaseClaimer & CDP stealth patches
-    │   ├── config.py       # Typed configuration loader (.env → Python)
-    │   ├── database.py     # SQLAlchemy models & SQLite engine
-    │   └── notifier.py     # Modular Discord/Apprise webhooks
-    └── stores/             # Store-specific claiming modules
-        ├── epic.py         # Epic Games Store
-        ├── prime.py        # Amazon Prime Gaming
-        ├── gog.py          # GOG (+ GOG code redemption from Prime)
-        ├── steam.py        # Steam (SteamDB scraping)
-        ├── epic_fab.py     # Fab limited-time free assets (shares Epic's session)
-        ├── ubisoft.py      # Ubisoft giveaways (ubisoft.com/games/free)
-        ├── aliexpress.py   # AliExpress check-in & coin collecting
-        ├── epic_mobile.py  # Epic's weekly free Android/iOS game (detection only)
-        └── gamerpower.py   # GamerPower API (Fanatical, Itch.io, IndieGala, Alienware)
+├── data/                   # Everything the bot keeps (Docker volume)
+│   ├── fgc.db              # SQLite database of what was already claimed
+│   ├── browser/<store>/    # One persistent Chrome profile per store
+│   └── screenshots/<store>/# Screenshots taken on failures
+├── src/
+│   ├── version.py          # Version string
+│   ├── gui/                # Local dashboard, settings API and three locales
+│   ├── core/               # Shared engine components
+│   │   ├── claimer.py      # BaseClaimer: browser launch, login waits, notifications
+│   │   ├── config.py       # Typed configuration loader (.env → Python)
+│   │   ├── database.py     # SQLAlchemy models & SQLite engine
+│   │   ├── notifier.py     # Modular Discord/Apprise webhooks
+│   │   ├── selection.py    # Which stores this run covers (GamerPower reads it)
+│   │   ├── updates.py      # Tells you when a newer release is published
+│   │   └── url_security.py # Hostname checks for redirects (never substring matching)
+│   └── stores/             # Store-specific claiming modules
+│       ├── epic.py         # Epic Games Store
+│       ├── prime.py        # Amazon Prime Gaming
+│       ├── gog.py          # GOG (+ GOG code redemption from Prime)
+│       ├── steam.py        # Steam (SteamDB scraping)
+│       ├── epic_fab.py     # Fab limited-time free assets (shares Epic's session)
+│       ├── unity.py        # Unity Asset Store weekly free asset
+│       ├── ubisoft.py      # Ubisoft giveaways (ubisoft.com/games/free)
+│       ├── aliexpress.py   # AliExpress check-in & coin collecting
+│       ├── epic_mobile.py  # Epic's weekly free Android/iOS game (detection only)
+│       └── gamerpower.py   # GamerPower API (Fanatical, Itch.io, IndieGala, Alienware)
 └── tests/                  # Fast unit tests for pure logic (no browser, no accounts)
 ```
 
 ### How it works
 
 1. **Scheduler** (`main.py`) supports recurring interval timers (`SCHEDULER_HOURS`), fixed daily drop windows (`SCHEDULER_FIXED_TIMES`), combined execution, and initial startup checks (`RUN_ON_STARTUP`).
-2. Each store module **starts its own browser** with an isolated profile, securely recalling session cookies (`--restore-last-session`).
+2. Each store module **starts its own browser** with an isolated profile, securely recalling session cookies (`--restore-last-session`). Two exceptions save a login: Fab rides Epic's profile, and GamerPower claims a whole store's giveaways in one session instead of one browser per game.
 3. **Login detection** checks the page DOM (not just cookies/DB).
-4. **Stealth profiles** are injected via Chrome DevTools Protocol (`CDP`) `addScriptToEvaluateOnNewDocument` right before document navigation, bypassing typical `page.evaluate` fingerprint detectors.
-5. **Game discovery** utilizes specialized scrapers (like reading SteamDB to circumvent typical lists).
-6. **Robust Database Storage** verifies historical success in `fgc.db` (SQLite) to block aggressive overlapping.
-7. **Clean Notifications** dispatch to you dynamically based on the toggles configured in the `.env` settings.
+4. **Fingerprint** is the one nodriver's patched Chrome produces by itself, because a hand-written desktop spoof did not match the real container and started summoning captchas (see CHANGELOG 1.4). Only AliExpress overrides it, injecting one coherent real-device Android fingerprint (`browserforge`) over the Chrome DevTools Protocol.
+5. **Game discovery** prefers each store's own data over scraping the page: Epic's promotions API, Ubisoft's embedded news feed, Fab's free-content blade, the GamerPower API, and SteamDB for Steam.
+6. **Store selection** (`STORES`) is published to the run, so GamerPower only claims on stores you actually enabled instead of forcing every giveaway it finds.
+7. **Robust Database Storage** verifies historical success in `fgc.db` (SQLite) to block aggressive overlapping.
+8. **Clean Notifications** dispatch to you dynamically based on the toggles configured in the `.env` settings, and a daily update check tells you when a newer release is out (`NOTIFY_UPDATES`).
 
 ---
 
@@ -311,9 +428,12 @@ Both Discord and Apprise can be configured simultaneously, notifications are sen
 |---|---|
 | Store not logging in | Open VNC (`http://localhost:7080`) and login manually. Your credentials or session logic persist beautifully after first login. |
 | Steam game not detected | Check that the game is listed on [SteamDB Free](https://steamdb.info/upcoming/free/). |
-| GamerPower missing games | Certain platforms (Itch.io, IndieGala, Alienware, Fanatical) require explicit `{STORE}_ENABLE=true` toggles in configuration to activate their respective handlers. |
+| GamerPower missing games | Certain platforms (Itch.io, IndieGala, Alienware, Fanatical) require explicit `{STORE}_ENABLE=true` toggles in configuration to activate their respective handlers. Giveaways for Steam, Epic or GOG are skipped when that store is not in your `STORES` list. |
+| Unity coupon not applied | Unity blocks the coupon while its checkout form is incomplete, see [5. Unity, first run only](#5-unity-first-run-only). Two other reasons it stops on purpose: a checkout rendered in a language other than English, and `UNITY_ACCEPT_TOS=false`, which halts right before the EULA. |
+| AliExpress coins not collected | The coin page sometimes loads as an empty shell. The bot tries once more (`AE_PAGE_RETRIES`), then reports it and moves on rather than retrying for half an hour. It has been seen working again on a later run; collect in the mobile app if it persists. |
 | Epic captcha | The stealth patches prevent 99% of captchas. EU 'Right of withdrawal' overlays are automatically accepted. If a rigorous manual prompt arrives, solve it once via VNC. |
 | False positive claims | Set `RESET_DB_GAMES=true` in your `.env`, reboot the container, and the bot will forget the last 7 days of claims, allowing the logic to try claiming them again. |
+| Setting seems to be ignored | The bot names every setting it does not read at startup, for example an invented `STEAM_ENABLE`, and every value that cannot mean what it says, for example `DRYRUN=maybe`, which counts as false. Passwords, e-mail addresses and webhook URLs are masked in that message. |
 | Container crashes on start | Check logs: `docker compose logs app --tail=50`. A clean restart purges `.X1-lock` bugs. |
 
 ### Something is not working, what to send us
@@ -322,7 +442,7 @@ The normal log shows only what you act on: which store is running, who is signed
 what was claimed, plus every warning and error. All the diagnostic detail is still there, one switch away:
 
 1. Set `DEBUG=true` in `.env` and restart (`docker compose up -d`), then reproduce the problem.
-2. Collect the log: `docker logs fgc-remaster --tail 500 > fgc.log` (remove your e-mail address if it appears).
+2. Collect the log: `docker logs fgc-remaster --tail 500 > fgc.log`. Account names are masked for you (`p***@gmail.com`), so it is safe to paste.
 3. Look in the `data/` folder for what the bot saw:
    - `data/screenshots/<store>/`, screenshots taken at every failure,
    - `data/ae_coin_api.json`, raw AliExpress check-in responses (streak, coins),
@@ -339,8 +459,9 @@ Please switch both off again once the problem is solved.
 
 ## Credits
 
-Inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer) – the original Node.js project.
-This remaster is a **completely independent rewrite** in Python, not a fork.
+**Claimer Control interface and Windows distribution:** [Rafael Caires](https://github.com/rafaelcairess).
+
+Built on [P-Adamiec/Free-Games-Claimer-Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster), the independent Python rewrite maintained by Paweł Adamiec and its contributors. That project was inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). See the Git history and [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for complete attribution.
 
 ---
 
@@ -352,12 +473,4 @@ This remaster is a **completely independent rewrite** in Python, not a fork.
 
 ## Analytics
 
-[![Star History Chart](https://api.star-history.com/svg?repos=P-Adamiec/Free-Games-Claimer-Remaster&type=Date)](https://www.star-history.com/?repos=P-Adamiec%2FFree-Games-Claimer-Remaster&type=date&legend=bottom-right)
-
-![Alt](https://repobeats.axiom.co/api/embed/5c6416eef2d3371808c7d1d50418546103b351f4.svg "Repobeats analytics image")
-
----
-
-<p align="center">
-<img alt="logo-fgc-remaster" src="logo.png" width="256" />
-</p>
+[![Star History Chart](https://api.star-history.com/svg?repos=rafaelcairess/free-games-claimer-remaster-gui&type=Date)](https://www.star-history.com/?repos=rafaelcairess%2Ffree-games-claimer-remaster-gui&type=date&legend=bottom-right)
