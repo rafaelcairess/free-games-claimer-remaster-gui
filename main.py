@@ -19,6 +19,7 @@ import logging
 import os
 import re
 import sys
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -28,7 +29,13 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from src.core.config import cfg, settings_warnings
 from src.core.claimer import mask_account
-from src.core.database import init_db, load_dashboard_history, save_dashboard_history
+from src.core.database import (
+    init_db,
+    load_dashboard_history,
+    load_last_automatic_run,
+    save_dashboard_history,
+    save_last_automatic_run,
+)
 from src.core.selection import apply_run_selection
 from src.core.updates import get_update_status, notify_if_update_available
 from src.stores.aliexpress import claim_aliexpress
@@ -433,7 +440,11 @@ async def run_claimers(requested_stores: list[str] | None = None) -> None:
     logger.info("✔ Claiming run complete.")
 
 
-async def run_claimers_scheduled(requested_stores: list[str] | None = None) -> None:
+async def run_claimers_scheduled(
+    requested_stores: list[str] | None = None,
+    *,
+    automatic: bool = False,
+) -> None:
     """Run claimers from scheduler jobs without overlapping executions."""
     if _claim_run_lock.locked():
         logger.warning("A claiming run is already in progress; skipping this scheduled trigger.")
@@ -446,21 +457,79 @@ async def run_claimers_scheduled(requested_stores: list[str] | None = None) -> N
             # Keep the dashboard usable even if an unexpected orchestration
             # error escapes after an individual store has finished.
             dashboard_state.finish_run()
+            if automatic:
+                try:
+                    await save_last_automatic_run(datetime.now(timezone.utc))
+                except Exception:
+                    logger.exception("Could not persist the automatic-run cooldown.")
 
 
-def _configure_scheduled_jobs(scheduler: AsyncIOScheduler) -> list[tuple[int, int]]:
+def _next_interval_run(
+    last_automatic_run: datetime | None,
+    interval_hours: int,
+    *,
+    now: datetime | None = None,
+) -> datetime | None:
+    """Anchor the interval to persisted state without replaying missed cycles."""
+    if interval_hours <= 0:
+        return None
+    current = now or datetime.now(timezone.utc)
+    current = current.replace(tzinfo=timezone.utc) if current.tzinfo is None else current.astimezone(timezone.utc)
+    if last_automatic_run is None:
+        return current + timedelta(hours=interval_hours)
+    last = last_automatic_run.replace(tzinfo=timezone.utc) if last_automatic_run.tzinfo is None else last_automatic_run.astimezone(timezone.utc)
+    due = last + timedelta(hours=interval_hours)
+    return due if due > current else current + timedelta(hours=interval_hours)
+
+
+def _startup_run_due(
+    last_automatic_run: datetime | None,
+    interval_hours: int,
+    *,
+    fixed_times: list[tuple[int, int]] | None = None,
+    fixed_timezone: ZoneInfo | None = None,
+    now: datetime | None = None,
+) -> bool:
+    """Run at boot only when no recent automatic cycle is still in cooldown."""
+    if last_automatic_run is None:
+        return True
+    last = last_automatic_run.replace(tzinfo=timezone.utc) if last_automatic_run.tzinfo is None else last_automatic_run.astimezone(timezone.utc)
+    current = now or datetime.now(timezone.utc)
+    current = current.replace(tzinfo=timezone.utc) if current.tzinfo is None else current.astimezone(timezone.utc)
+    interval_due = interval_hours > 0 and current >= last + timedelta(hours=interval_hours)
+    fixed_due = False
+    if fixed_times:
+        local_now = current.astimezone(fixed_timezone or timezone.utc)
+        candidates = []
+        for hour, minute in fixed_times:
+            candidate = local_now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            if candidate > local_now:
+                candidate -= timedelta(days=1)
+            candidates.append(candidate.astimezone(timezone.utc))
+        fixed_due = bool(candidates) and last < max(candidates)
+    if interval_hours <= 0 and not fixed_times:
+        return True
+    return interval_due or fixed_due
+
+
+def _configure_scheduled_jobs(
+    scheduler: AsyncIOScheduler,
+    last_automatic_run: datetime | None = None,
+) -> list[tuple[int, int]]:
     """Replace recurring jobs with the dashboard/current config values."""
     for job in scheduler.get_jobs():
         if job.id == "claim_all" or job.id.startswith("claim_fixed_"):
             scheduler.remove_job(job.id)
 
     if cfg.scheduler_hours > 0:
+        next_run = _next_interval_run(last_automatic_run, cfg.scheduler_hours)
         scheduler.add_job(
             run_claimers_scheduled,
-            trigger=IntervalTrigger(hours=cfg.scheduler_hours),
+            trigger=IntervalTrigger(hours=cfg.scheduler_hours, start_date=next_run),
             id="claim_all",
             name="Claim free games",
             replace_existing=True,
+            kwargs={"automatic": True},
         )
 
     fixed_times = _parse_fixed_times(cfg.scheduler_fixed_times)
@@ -472,6 +541,7 @@ def _configure_scheduled_jobs(scheduler: AsyncIOScheduler) -> list[tuple[int, in
             id=f"claim_fixed_{hour:02d}_{minute:02d}",
             name=f"Claim free games at {hour:02d}:{minute:02d}",
             replace_existing=True,
+            kwargs={"automatic": True},
         )
     return fixed_times
 
@@ -550,7 +620,12 @@ async def main() -> None:
 
     # Otherwise start the scheduler
     scheduler = AsyncIOScheduler(job_defaults=_CLAIM_JOB_OPTIONS)
-    fixed_times = _configure_scheduled_jobs(scheduler)
+    try:
+        last_automatic_run = await load_last_automatic_run()
+    except Exception:
+        logger.exception("Could not load the automatic-run cooldown.")
+        last_automatic_run = None
+    fixed_times = _configure_scheduled_jobs(scheduler, last_automatic_run)
     if cfg.scheduler_hours <= 0:
         logger.info("Interval scheduler disabled because SCHEDULER_HOURS=%s.", cfg.scheduler_hours)
 
@@ -563,13 +638,22 @@ async def main() -> None:
     # The packaged Windows experience opens the local setup wizard before any
     # account automation. Existing source/Docker users are unaffected unless
     # they explicitly enable GUI_SETUP_REQUIRED.
-    if cfg.run_on_startup and not setup_pending:
+    fixed_timezone = _scheduler_timezone() if fixed_times else None
+    if cfg.run_on_startup and not setup_pending and _startup_run_due(
+        last_automatic_run,
+        cfg.scheduler_hours,
+        fixed_times=fixed_times,
+        fixed_timezone=fixed_timezone,
+    ):
         scheduler.add_job(
             run_claimers_scheduled,
             id="claim_all_startup",
             name="Initial claiming run",
             replace_existing=True,
+            kwargs={"automatic": True},
         )
+    elif cfg.run_on_startup and not setup_pending:
+        logger.info("Initial claiming run skipped because the previous automatic cycle is still in cooldown.")
     elif not cfg.run_on_startup:
         logger.info("Initial claiming run disabled by RUN_ON_STARTUP=false.")
     else:
@@ -598,12 +682,12 @@ async def main() -> None:
                 result = save_settings(values)
             except SettingsError:
                 raise
-            _configure_scheduled_jobs(scheduler)
+            _configure_scheduled_jobs(scheduler, await load_last_automatic_run())
             return result
 
         async def dashboard_setup(values: dict) -> dict:
             result = complete_setup(values)
-            _configure_scheduled_jobs(scheduler)
+            _configure_scheduled_jobs(scheduler, await load_last_automatic_run())
             if scheduler.state == STATE_PAUSED:
                 scheduler.resume()
             return result

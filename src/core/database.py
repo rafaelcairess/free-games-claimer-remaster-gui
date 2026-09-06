@@ -82,6 +82,18 @@ class DashboardHistory(Base):
     finished_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
 
+class RuntimeState(Base):
+    """Small persistent values used to resume automation safely after restarts."""
+
+    __tablename__ = "runtime_state"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(Text)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -229,3 +241,34 @@ async def load_dashboard_history(limit: int = 250, session_factory=None) -> list
             .limit(safe_limit)
         )
         return [_history_row(row) for row in result.scalars().all()]
+
+
+_LAST_AUTOMATIC_RUN_KEY = "last_automatic_run"
+
+
+async def save_last_automatic_run(value: datetime, session_factory=None) -> None:
+    """Persist the end of an automatic cycle so restarts respect its cooldown."""
+    factory = session_factory or async_session
+    encoded = _as_utc(value).isoformat()
+    async with factory() as session:
+        row = await session.get(RuntimeState, _LAST_AUTOMATIC_RUN_KEY)
+        if row is None:
+            session.add(RuntimeState(key=_LAST_AUTOMATIC_RUN_KEY, value=encoded))
+        else:
+            row.value = encoded
+        await session.commit()
+
+
+async def load_last_automatic_run(session_factory=None) -> datetime | None:
+    """Return the most recently completed automatic cycle, if one was recorded."""
+    factory = session_factory or async_session
+    async with factory() as session:
+        row = await session.get(RuntimeState, _LAST_AUTOMATIC_RUN_KEY)
+        if row is None:
+            return None
+        try:
+            parsed = datetime.fromisoformat(row.value.replace("Z", "+00:00"))
+            return parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed.astimezone(timezone.utc)
+        except (AttributeError, TypeError, ValueError):
+            logger.warning("Ignoring invalid persisted automatic-run timestamp.")
+            return None

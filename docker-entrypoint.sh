@@ -9,10 +9,31 @@ set -eo pipefail
 
 # Browser profile directory (can be customized via BROWSER_DIR env var)
 BROWSER="${BROWSER_DIR:-data/browser}"
+case "$BROWSER" in
+    /*) browser_root="$BROWSER" ;;
+    *) browser_root="/fgc/$BROWSER" ;;
+esac
+
+# Browser caches are disposable and can grow significantly in a persistent
+# volume. Remove only known cache directories before Chrome starts; cookies,
+# local storage and the rest of each signed-in profile remain untouched.
+if [ "${CLEAN_BROWSER_CACHE_ON_STARTUP:-true}" = "true" ]; then
+    case "$browser_root" in
+        /fgc/data/browser|/fgc/data/browser/*)
+            if [ -d "$browser_root" ]; then
+                find "$browser_root" -type d \
+                    \( -name Cache -o -name Code\ Cache -o -name GPUCache \
+                       -o -name DawnCache -o -name ShaderCache -o -name GrShaderCache \) \
+                    -exec find {} -mindepth 1 -delete \; 2>/dev/null || true
+            fi
+            ;;
+        *) echo "Skipping browser cache cleanup outside /fgc/data/browser: $browser_root" ;;
+    esac
+fi
 
 # Remove Chrome's profile lock file to prevent "profile in use" errors
 # after the container was stopped ungracefully (e.g. power loss, docker kill)
-rm -f "/fgc/$BROWSER/SingletonLock"
+rm -f "$browser_root/SingletonLock"
 
 # Remove stale X11 display lock files that remain when reusing containers
 # (common with 'docker compose up' after a restart)

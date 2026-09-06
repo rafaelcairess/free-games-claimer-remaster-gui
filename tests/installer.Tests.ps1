@@ -92,3 +92,12 @@ Describe "Local dashboard readiness" {
         }
     }
 }
+
+Describe "Application identity" {
+    It "uses the Claimer Control icon for setup and shortcuts" {
+        $installer = Get-Content -LiteralPath "$PSScriptRoot/../installer/ClaimerControl.iss" -Raw
+        if ($installer -notmatch 'SetupIconFile=ClaimerControl\.ico') { throw "Setup icon is not configured" }
+        if ($installer -notmatch 'IconFilename: "\{app\}\\ClaimerControl\.ico"') { throw "Shortcut icon is not configured" }
+        if (-not (Test-Path -LiteralPath "$PSScriptRoot/../installer/ClaimerControl.ico")) { throw "Installer icon is missing" }
+    }
+}

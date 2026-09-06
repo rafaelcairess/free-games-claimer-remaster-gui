@@ -28,8 +28,8 @@ RUN printf 'Acquire::ForceIPv4 "true";\nAcquire::Retries "5";\nAcquire::http::Ti
         curl ca-certificates gnupg \
         # Python and pip (the bot is written in Python)
         python3 python3-pip \
-        # dos2unix fixes Windows line endings; tini is a proper init process for Docker
-        dos2unix tini \
+        # tini is a proper init process for Docker
+        tini \
     && mkdir -p /etc/apt/keyrings \
     # ── Install TurboVNC & VirtualGL (virtual display system) ──
     # These let Chrome render pages even without a real monitor
@@ -96,7 +96,7 @@ COPY main.py docker-entrypoint.sh ./
 COPY src ./src
 
 # Fix Windows-style line endings (\r\n → \n) in shell scripts and make them executable
-RUN dos2unix docker-entrypoint.sh \
+RUN sed -i 's/\r$//' docker-entrypoint.sh \
     && chmod +x docker-entrypoint.sh \
     && cp docker-entrypoint.sh /usr/local/bin/
 

@@ -260,6 +260,10 @@ def test_frontend_is_local_and_contains_store_controls():
 
     assert "__FGC_TOKEN__" in html
     assert "Claimer Control" in html
+    assert "/assets/icons/claimer-control.png" in html
+    assert '"/assets/icons/claimer-control.png"' in (
+        Path(__file__).resolve().parent.parent / "src" / "gui" / "server.py"
+    ).read_text(encoding="utf-8")
     assert "data-i18n=\"dashboard.runNow\"" in html
     assert "data-i18n=\"settings.title\"" in html
     assert "data-i18n=\"security.title\"" in html
@@ -278,6 +282,9 @@ def test_frontend_is_local_and_contains_store_controls():
     assert "storeManagerForm" in html
     assert "historyList" in html
     assert "renderHistory(status)" in script
+    assert "statusPollDelay" in script
+    assert "document.hidden" in script
+    assert "setInterval(() => refreshStatus(), 3000)" not in script
     assert "/assets/icons/aliexpress.svg" in (
         static / "app.css"
     ).read_text(encoding="utf-8")

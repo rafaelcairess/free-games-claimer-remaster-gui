@@ -1,4 +1,8 @@
-<h1 align="center">🎮 Claimer Control</h1>
+<p align="center">
+  <img src="images/claimer-control-logo.png" alt="Claimer Control" width="128" height="128">
+</p>
+
+<h1 align="center">Claimer Control</h1>
 
 <p align="center">
   <strong>Seus jogos gratuitos e recompensas diárias em um painel local e privado.</strong><br>

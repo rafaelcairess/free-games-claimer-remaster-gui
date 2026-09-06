@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.core.database import (
     Base,
+    load_last_automatic_run,
     load_dashboard_history,
     sanitise_dashboard_details,
+    save_last_automatic_run,
     save_dashboard_history,
 )
 from src.gui.state import DashboardState
@@ -91,3 +93,19 @@ def test_dashboard_history_survives_a_new_database_session(tmp_path):
         "items": [{"title": "Example Game", "outcome": "claimed"}],
     }
     assert "DO-NOT-SAVE" not in json.dumps(rows)
+
+
+def test_automatic_run_cooldown_survives_a_new_database_session(tmp_path):
+    async def scenario():
+        engine = create_async_engine(f"sqlite+aiosqlite:///{tmp_path / 'runtime.db'}")
+        factory = async_sessionmaker(engine, expire_on_commit=False)
+        async with engine.begin() as connection:
+            await connection.run_sync(Base.metadata.create_all)
+        expected = datetime(2026, 9, 6, 12, 30, tzinfo=timezone.utc)
+        await save_last_automatic_run(expected, factory)
+        actual = await load_last_automatic_run(factory)
+        await engine.dispose()
+        return expected, actual
+
+    expected, actual = asyncio.run(scenario())
+    assert actual == expected

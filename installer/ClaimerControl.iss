@@ -24,6 +24,8 @@ SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayName=Claimer Control
 LicenseFile=..\LICENSE
+SetupIconFile=ClaimerControl.ico
+UninstallDisplayIcon={app}\ClaimerControl.ico
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "security-en.txt"
@@ -50,11 +52,12 @@ Source: "Start-ClaimerControl.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Start-ClaimerControl.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "docker-compose.yml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "claimer.env"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ClaimerControl.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Claimer Control"; Filename: "{app}\Start-ClaimerControl.cmd"; WorkingDir: "{app}"
-Name: "{autodesktop}\Claimer Control"; Filename: "{app}\Start-ClaimerControl.cmd"; WorkingDir: "{app}"; Tasks: desktopicon
-Name: "{userstartup}\Claimer Control"; Filename: "{app}\Start-ClaimerControl.cmd"; WorkingDir: "{app}"; Tasks: autostart
+Name: "{group}\Claimer Control"; Filename: "{app}\Start-ClaimerControl.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\ClaimerControl.ico"
+Name: "{autodesktop}\Claimer Control"; Filename: "{app}\Start-ClaimerControl.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\ClaimerControl.ico"; Tasks: desktopicon
+Name: "{userstartup}\Claimer Control"; Filename: "{app}\Start-ClaimerControl.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\ClaimerControl.ico"; Tasks: autostart
 Name: "{group}\Uninstall Claimer Control"; Filename: "{uninstallexe}"
 
 [Registry]

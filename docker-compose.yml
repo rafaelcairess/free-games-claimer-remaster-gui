@@ -8,6 +8,13 @@ services:
     container_name: fgc-remaster
     build: .
     restart: unless-stopped
+    mem_limit: ${CLAIMER_MEMORY_LIMIT:-2g}
+    pids_limit: ${CLAIMER_PIDS_LIMIT:-512}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     tty: true
     stdin_open: true
     ports:
@@ -17,6 +24,8 @@ services:
       - fgc_data:/fgc/data
     env_file:
       - .env
+    environment:
+      CLEAN_BROWSER_CACHE_ON_STARTUP: ${CLEAN_BROWSER_CACHE_ON_STARTUP:-true}
     healthcheck:
       test: pgrep python3 && curl --fail http://localhost:7080 || exit 1
       interval: 10s

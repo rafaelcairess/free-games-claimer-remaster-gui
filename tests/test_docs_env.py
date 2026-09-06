@@ -11,8 +11,14 @@ ROOT = Path(__file__).resolve().parent.parent
 ENV_EXAMPLE = (ROOT / ".env.example").read_text(encoding="utf-8")
 README = (ROOT / "README.md").read_text(encoding="utf-8")
 
-# Handled by Docker, not by config.py: the image tag and TurboVNC's own password.
-DOCKER_ONLY = {"CLAIMER_TAG", "VNC_PASSWORD"}
+# Handled by Docker/Compose rather than config.py.
+DOCKER_ONLY = {
+    "CLAIMER_TAG",
+    "CLAIMER_MEMORY_LIMIT",
+    "CLAIMER_PIDS_LIMIT",
+    "CLEAN_BROWSER_CACHE_ON_STARTUP",
+    "VNC_PASSWORD",
+}
 
 
 def _config_vars() -> list[str]:

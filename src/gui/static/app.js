@@ -13,6 +13,7 @@ let latestUpdate = null;
 let activeSettingsSection = 'section.stores';
 let setupStep = 0;
 let setupValues = {};
+let statusPollTimer = null;
 
 function detectedLocale() {
   return detectLocale(
@@ -275,6 +276,19 @@ function renderStatus(status) {
 async function refreshStatus(silent = true) {
   try { renderStatus(await api('/api/status')); }
   catch (error) { if (!silent) showToast(error.message, true); }
+}
+
+function statusPollDelay() {
+  if (document.hidden) return 30000;
+  return latestStatus?.running ? 2000 : 15000;
+}
+
+function scheduleStatusPoll(delay = statusPollDelay()) {
+  clearTimeout(statusPollTimer);
+  statusPollTimer = setTimeout(async () => {
+    await refreshStatus();
+    scheduleStatusPoll();
+  }, delay);
 }
 
 async function runStores(stores = null) {
@@ -726,5 +740,7 @@ document.addEventListener('click', event => {
   }
 });
 
-initialise().catch(error => showToast(error.message || t('error.generic'), true));
-setInterval(() => refreshStatus(), 3000);
+initialise()
+  .catch(error => showToast(error.message || t('error.generic'), true))
+  .finally(() => scheduleStatusPoll());
+document.addEventListener('visibilitychange', () => scheduleStatusPoll(document.hidden ? 30000 : 0));
