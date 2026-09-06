@@ -266,6 +266,7 @@ def test_frontend_is_local_and_contains_store_controls():
     assert "Lontrium Control" in html
     assert "/assets/icons/lontrium.png" in html
     assert "onboarding-mascot" in html
+    assert "settings-mascot" in html
     assert '"/assets/icons/lontrium.png"' in (
         Path(__file__).resolve().parent.parent / "src" / "gui" / "server.py"
     ).read_text(encoding="utf-8")
