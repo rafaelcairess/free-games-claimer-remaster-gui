@@ -317,18 +317,21 @@ function Update-Application {
     Start-Process $PanelUrl | Out-Null
 }
 
-function Invoke-ClaimerControl {
+function Invoke-ClaimerControl(
+    [ValidateSet("start", "source", "update", "uninstall", "check")]
+    [string]$RequestedAction = $Action
+) {
     try {
         $host.UI.RawUI.WindowTitle = $Script:Text.Title
         if (-not (Test-Path -LiteralPath $ComposeFile) -or -not (Test-Path -LiteralPath $EnvironmentFile)) {
             throw "Required launcher files are missing"
         }
-        if ($Action -eq "check") { Write-Host $Script:Text.CheckOk -ForegroundColor Green; return 0 }
+        if ($RequestedAction -eq "check") { Write-Host $Script:Text.CheckOk -ForegroundColor Green; return 0 }
         if (-not (Test-DockerCommandAvailable)) { Install-DockerDesktop }
         Wait-DockerDesktop
-        if ($Action -eq "update") { Update-Application }
-        elseif ($Action -eq "source") { Start-SourceApplication }
-        elseif ($Action -eq "uninstall") {
+        if ($RequestedAction -eq "update") { Update-Application }
+        elseif ($RequestedAction -eq "source") { Start-SourceApplication }
+        elseif ($RequestedAction -eq "uninstall") {
             Invoke-Compose @("down")
             if ($RemoveData) {
                 $volume = Get-EnvironmentValue "CLAIMER_DATA_VOLUME"

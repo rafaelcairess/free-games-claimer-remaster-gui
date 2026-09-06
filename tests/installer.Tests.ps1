@@ -4,7 +4,6 @@ Describe "Claimer Control launcher flow" {
     }
 
     BeforeEach {
-        $script:Action = "start"
         Mock Test-Path { $true }
         Mock Wait-DockerDesktop {}
         Mock Start-Application {}
@@ -14,7 +13,8 @@ Describe "Claimer Control launcher flow" {
 
     It "starts directly when Docker is installed" {
         Mock Test-DockerCommandAvailable { $true }
-        Invoke-ClaimerControl | Should Be 0
+        $result = Invoke-ClaimerControl
+        if ($result -ne 0) { throw "Expected launcher exit code 0, got $result" }
         Assert-MockCalled Install-DockerDesktop -Times 0 -Exactly -Scope It
         Assert-MockCalled Wait-DockerDesktop -Times 1 -Exactly -Scope It
         Assert-MockCalled Start-Application -Times 1 -Exactly -Scope It
@@ -22,23 +22,25 @@ Describe "Claimer Control launcher flow" {
 
     It "waits for Docker when the command exists but the engine is stopped" {
         Mock Test-DockerCommandAvailable { $true }
-        Invoke-ClaimerControl | Should Be 0
+        $result = Invoke-ClaimerControl
+        if ($result -ne 0) { throw "Expected launcher exit code 0, got $result" }
         Assert-MockCalled Wait-DockerDesktop -Times 1 -Exactly -Scope It
         Assert-MockCalled Start-Application -Times 1 -Exactly -Scope It
     }
 
     It "installs Docker before starting when Docker is absent" {
         Mock Test-DockerCommandAvailable { $false }
-        Invoke-ClaimerControl | Should Be 0
+        $result = Invoke-ClaimerControl
+        if ($result -ne 0) { throw "Expected launcher exit code 0, got $result" }
         Assert-MockCalled Install-DockerDesktop -Times 1 -Exactly -Scope It
         Assert-MockCalled Wait-DockerDesktop -Times 1 -Exactly -Scope It
         Assert-MockCalled Start-Application -Times 1 -Exactly -Scope It
     }
 
     It "uses the local source flow from a repository checkout" {
-        $script:Action = "source"
         Mock Test-DockerCommandAvailable { $true }
-        Invoke-ClaimerControl | Should Be 0
+        $result = Invoke-ClaimerControl -RequestedAction source
+        if ($result -ne 0) { throw "Expected launcher exit code 0, got $result" }
         Assert-MockCalled Start-SourceApplication -Times 1 -Exactly -Scope It
         Assert-MockCalled Start-Application -Times 0 -Exactly -Scope It
     }
@@ -60,11 +62,13 @@ Describe "Legacy Docker data discovery" {
   }
 ]
 '@
-        Get-LegacyDataVolumeFromInspect $json | Should Be "fgc-remaster_fgc-data"
+        $volume = Get-LegacyDataVolumeFromInspect $json
+        if ($volume -ne "fgc-remaster_fgc-data") { throw "Unexpected legacy volume: $volume" }
     }
 
     It "returns an empty value when the expected mount is absent" {
-        Get-LegacyDataVolumeFromInspect '[{"Mounts":[]}]' | Should Be ""
+        [string]$volume = Get-LegacyDataVolumeFromInspect '[{"Mounts":[]}]'
+        if ($volume -ne "") { throw "Expected no legacy volume, got $volume" }
     }
 }
 
