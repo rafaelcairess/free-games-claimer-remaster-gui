@@ -51,7 +51,7 @@ Name: "autostart"; Description: "{cm:AutoStartTask}"; GroupDescription: "{cm:Aut
 Source: "Start-ClaimerControl.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Start-ClaimerControl.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "docker-compose.yml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "claimer.env"; DestDir: "{app}"; Flags: ignoreversion
+Source: "claimer.env"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
 Source: "Lontrium.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

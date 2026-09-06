@@ -119,4 +119,11 @@ Describe "Application identity" {
         if ($installer -notmatch 'Software\\Classes\\lontrium') { throw "Lontrium update protocol is not configured" }
         if ($installer -notmatch 'Software\\Classes\\claimer-control') { throw "Legacy update protocol alias is missing" }
     }
+
+    It "does not overwrite the local data-volume configuration during upgrades" {
+        $installer = Get-Content -LiteralPath "$PSScriptRoot/../installer/ClaimerControl.iss" -Raw
+        if ($installer -notmatch 'Source: "claimer\.env";[^\r\n]+onlyifdoesntexist') {
+            throw "Installer upgrades could replace the user's persistent volume configuration"
+        }
+    }
 }
