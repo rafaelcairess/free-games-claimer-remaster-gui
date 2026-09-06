@@ -1,131 +1,119 @@
 # Claimer Control
 
 <p align="center">
-  <strong>Un panel local que reclama juegos gratuitos y las monedas diarias de AliExpress.</strong><br>
-  <sub>El panel, las cuentas y las sesiones del navegador permanecen en tu equipo.</sub>
+  <strong>Tus juegos gratuitos y recompensas diarias en un panel local y privado.</strong><br>
+  Instálalo una vez, elige tus tiendas y deja que Claimer Control se ocupe de la rutina.
+</p>
+
+<p align="center">
+  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/actions/workflows/release.yml"><img alt="Pruebas" src="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/actions/workflows/release.yml/badge.svg"></a>
+  <a href="../LICENSE"><img alt="Licencia AGPL-3.0" src="https://img.shields.io/github/license/rafaelcairess/free-games-claimer-remaster-gui?style=flat-square"></a>
+  <img alt="Windows 10 y 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-5aa7d9?style=flat-square">
+  <img alt="Datos locales" src="https://img.shields.io/badge/datos-solo%20locales-6ee1b6?style=flat-square">
+  <img alt="Idiomas" src="https://img.shields.io/badge/idiomas-EN%20%7C%20PT--BR%20%7C%20ES-bde6fb?style=flat-square">
 </p>
 
 <p align="center">
   <a href="../README.md">English</a> ·
   <a href="./README.pt-BR.md">Português do Brasil</a> ·
-  <strong>Español</strong>
+  <a href="./README.es.md">Español</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest/download/Claimer-Control-Setup.exe"><strong>Descargar para Windows</strong></a>
-  · <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest">Notas de la versión y SHA-256</a>
+  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases"><strong>Descargar Claimer Control para Windows</strong></a>
 </p>
 
-> [!IMPORTANT]
-> Claimer Control no mantiene un servidor de credenciales ni incluye telemetría. Los datos introducidos en el panel permanecen en el volumen Docker local y solo el navegador automatizado los envía al inicio de sesión oficial de cada tienda.
+> [!NOTE]
+> El instalador para Windows estará disponible en Releases con la versión `v1.0.0`. Hasta que se publique, este repositorio contiene la versión de desarrollo.
 
-Mantenido por [Rafael Caires](https://github.com/rafaelcairess), basado en [Free Games Claimer Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster) de Paweł Adamiec. Se conservan la autoría original y la licencia AGPL-3.0.
+![Panel de Claimer Control con resultados de juegos y AliExpress](images/05-dashboard.png)
 
-## Funciones
+## Qué hace
 
-- Muestra tiendas seleccionadas, ejecución actual, próximo horario y resultados reales.
-- Indica el nombre de cada juego y si fue reclamado, ya estaba en la biblioteca o falló.
-- Muestra monedas recogidas, saldo, racha y próxima recompensa de AliExpress cuando la API proporciona esos datos.
-- Ejecuta todas las tiendas o una sola.
-- Abre el navegador visual para inicio manual, 2FA y desafíos de seguridad.
-- Configura tiendas, cuentas, programación y notificaciones sin editar archivos.
-- Detecta español, portugués o inglés y permite cambiarlo manualmente.
-- Avisa de actualizaciones, pero solo las instala después de tu confirmación.
+- Reclama juegos, recursos y recompensas elegibles en las tiendas seleccionadas.
+- Recoge la recompensa diaria de AliExpress y muestra monedas, saldo y racha.
+- Informa el resultado real de cada ejecución, no solo una cantidad genérica.
+- Funciona con un horario y puede iniciarse automáticamente con Windows.
+- Abre un navegador visual cuando una tienda requiere inicio de sesión o confirmación manual.
+- Mantiene el panel, la configuración, la base de datos y las sesiones en tu computadora.
 
-Tiendas principales: Steam, Epic Games, Fab, Prime Gaming, GOG, Ubisoft, Unity Asset Store, AliExpress y fuentes adicionales de GamerPower.
+## Servicios compatibles
 
-## Instalación en Windows
-
-1. Descarga **[Claimer-Control-Setup.exe](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest/download/Claimer-Control-Setup.exe)** desde la Release más reciente.
-2. Ejecuta el instalador. Si falta Docker Desktop, Claimer Control explica por qué se necesita y solicita autorización para instalarlo desde la fuente oficial.
-3. El panel se abrirá automáticamente. Sigue el asistente para elegir idioma, tiendas, cuentas opcionales y programación.
-
-Docker puede solicitar permisos de administrador y reiniciar Windows. Claimer Control reanuda la configuración después de iniciar sesión. Como el instalador todavía no tiene certificado de firma, SmartScreen puede mostrar “Editor desconocido”. Compara el archivo con `SHA256SUMS.txt` de la misma Release.
-
-El acceso directo inicia Docker cuando es necesario, descarga la imagen correcta, inicia el contenedor y abre `http://localhost:8080`. No es necesario usar PowerShell manualmente.
-
-## Primer uso
-
-El asistente tiene seis pasos:
-
-1. idioma detectado desde Windows y el navegador;
-2. explicación de seguridad;
-3. tiendas visibles y automatizadas;
-4. credenciales opcionales;
-5. intervalo, horarios e inicio con Windows;
-6. revisión y primera ejecución.
-
-Deja vacía cualquier cuenta si prefieres iniciar sesión manualmente. Pulsa **Navegador** y entra directamente en la tienda dentro de la sesión visual local. Las cookies y sesiones quedan en el volumen Docker.
-
-## Seguridad y credenciales
-
-| Pregunta | Respuesta |
+| Juegos y recursos | Recompensas y descubrimiento |
 |---|---|
-| ¿Rafael o Claimer Control reciben mis contraseñas? | No. No existe un servidor nuestro que reciba los datos del panel. |
-| ¿Dónde se guardan? | En `gui.env`, dentro del volumen Docker local y con permisos restringidos. |
-| ¿La contraseña sale del equipo? | Solo para que el navegador automatizado la envíe directamente al inicio oficial de la tienda. |
-| ¿El panel puede mostrar una contraseña guardada? | No. La API solo indica si el campo está configurado. |
-| ¿El panel está en Internet? | No. Usa `127.0.0.1` por defecto. No expongas el puerto 8080. |
-| ¿Hay telemetría? | No. Las conexiones externas son las tiendas, notificaciones configuradas y búsqueda de actualizaciones. |
+| Epic Games, Steam, GOG, Prime Gaming, Ubisoft, Fab y Unity Asset Store | Monedas diarias de AliExpress y descubrimiento de promociones con GamerPower |
 
-El botón `?` junto a cada credencial explica para qué tienda se utiliza. Las contraseñas y sesiones locales siguen siendo datos sensibles: protege tu cuenta de Windows y el disco.
+GamerPower también puede enviar promociones compatibles de Fanatical, itch.io e IndieGala. La disponibilidad y los requisitos de acceso dependen de cada tienda.
 
-## Capturas
+## Instálalo en tres pasos
 
-Todas las capturas usan cuentas sintéticas y resultados de demostración.
+1. Descarga `Claimer-Control-Setup.exe` desde la [Release más reciente](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases).
+2. Ejecuta el instalador. Si falta Docker Desktop, el launcher explica por qué es necesario y solo lo instala desde la fuente oficial después de tu confirmación.
+3. Sigue el asistente local: elige idioma y tiendas, añade credenciales si lo deseas y configura el horario.
 
-| Configuración inicial | Seguridad local |
+Eso es todo. No necesitas clonar el repositorio, editar archivos de configuración ni escribir comandos de Docker.
+
+El instalador puede solicitar permisos de administrador o reiniciar Windows mientras instala Docker Desktop. Como el primer instalador no estará firmado, Windows SmartScreen puede mostrar un aviso de editor desconocido. Cada Release incluye `SHA256SUMS.txt` para comprobar la descarga.
+
+## Tus datos permanecen en tu computadora
+
+Claimer Control no tiene un servidor de cuentas ni incluye telemetría.
+
+| Qué sucede | Dónde sucede |
 |---|---|
-| ![Elección de idioma](images/01-language.png) | ![Explicación de seguridad](images/02-security.png) |
+| Panel y configuración | En `127.0.0.1`, disponible solamente desde esta computadora |
+| Credenciales y sesiones | En el volumen Docker local |
+| Inicio de sesión en tiendas | Directamente entre el navegador automatizado y el sitio oficial de la tienda |
+| Respuesta de la API sobre secretos | Solo `configured: true/false`; la contraseña nunca vuelve al panel |
+| Actualizaciones | Se consultan en las Releases oficiales de este proyecto en GitHub |
 
-| Tiendas | Credenciales |
+Las credenciales son opcionales y el acceso manual mediante el navegador siempre está disponible. Los secretos locales no están protegidos por un servidor externo de cifrado; protege tu cuenta de Windows y el disco. Claimer Control no intenta eludir CAPTCHA, sistemas antifraude ni desafíos de seguridad.
+
+## Diseñado para ser claro
+
+Solo las tiendas habilitadas aparecen en el panel. Cada fila explica qué ocurrió: qué juego fue reclamado, cuál ya estaba en la biblioteca, si no había promoción o cuántas monedas de AliExpress fueron recogidas.
+
+| Configuración guiada de la cuenta | Detalles de monedas de AliExpress |
 |---|---|
-| ![Selección de tiendas](images/03-stores.png) | ![Ayuda de credenciales](images/04-credentials.png) |
+| ![Campo de credenciales con explicación de privacidad](images/04-credentials.png) | ![Monedas diarias, saldo y racha de AliExpress](images/06-aliexpress.png) |
 
-| Panel | Monedas de AliExpress |
+Cada credencial tiene una explicación accesible en el botón `?`. La interfaz funciona con ratón, teclado y toque, y está completamente traducida al inglés, portugués de Brasil y español.
+
+## Uso diario
+
+- Abre **Claimer Control** desde el menú Inicio o el acceso directo del escritorio.
+- Usa **Ejecutar ahora** para todas las tiendas o ejecuta una tienda individualmente.
+- Usa **Navegador** cuando una tienda solicite acceso, CAPTCHA o confirmación manual.
+- Usa **Configuración** para cambiar tiendas, cuentas, notificaciones y horarios.
+- Las actualizaciones se ofrecen en el panel y conservan el volumen local.
+
+El launcher comprueba Docker, inicia el servicio, espera al panel y lo abre automáticamente. Al desinstalar Claimer Control se conservan las cuentas y sesiones por defecto; borrar los datos locales es una opción separada y explícita. Docker Desktop nunca se elimina automáticamente.
+
+## ¿Necesitas ayuda?
+
+| Problema | Qué puedes intentar |
 |---|---|
-| ![Resultados de juegos](images/05-dashboard.png) | ![Saldo y racha de AliExpress](images/06-aliexpress.png) |
+| El panel no se abrió | Abre [http://127.0.0.1:8080](http://127.0.0.1:8080) y confirma que Docker Desktop está en ejecución. |
+| Una tienda necesita atención | Abre el navegador visual desde el panel y completa la solicitud oficial de la tienda. |
+| Una sesión caducó | Inicia sesión otra vez mediante el navegador visual; la sesión actualizada se conservará localmente. |
+| Un reclamo falló | Vuelve a ejecutar únicamente esa tienda y adjunta el fragmento relevante del registro sanitizado al abrir una issue. |
 
-| Programación | Inicio manual |
-|---|---|
-| ![Configuración de horarios](images/07-schedule.png) | ![Navegador visual local](images/08-browser.png) |
+Para informar errores o sugerir funciones, usa las [Issues de GitHub](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/issues). Nunca publiques contraseñas, cookies, claves TOTP, capturas completas de red ni imágenes sin sanitizar.
 
-## Automatización y actualizaciones
+## Para contribuidores
 
-- Intervalo predeterminado: 12 horas.
-- Se pueden usar horarios fijos, combinar ambos modos o ejecutar solo manualmente.
-- Iniciar con Windows viene marcado en el instalador, pero se puede desactivar.
-- El panel consulta la Release oficial y muestra **Ver actualización**. El launcher local actualiza la imagen solo después de confirmar y conserva el volumen.
-- La desinstalación conserva cuentas, historial y sesiones por defecto. Eliminarlos requiere una confirmación separada.
-- El desinstalador nunca elimina Docker Desktop.
+El instalador es el camino recomendado para usuarios. Las compilaciones desde el código fuente, la arquitectura y las variables internas son temas de desarrollo:
 
-## Instalación manual
+- [`.env.example`](../.env.example) — referencia completa para compilaciones desde el código fuente
+- [`MODIFICATIONS.md`](../MODIFICATIONS.md) — historial de implementación y diferencias técnicas
+- [`CHANGELOG.md`](../CHANGELOG.md) — cambios de cada versión
 
-Para Linux, NAS o desarrollo:
+Las pruebas cubren los módulos de tiendas, la API local, la protección de secretos, las traducciones, la configuración inicial y el launcher de Windows.
 
-```bash
-git clone https://github.com/rafaelcairess/free-games-claimer-remaster-gui.git
-cd free-games-claimer-remaster-gui
-cp .env.example .env
-docker compose up -d
-```
+## Créditos y licencia
 
-- Panel: `http://localhost:8080`
-- Navegador visual: `http://localhost:7080`
-- Logs: `docker logs -f fgc-remaster`
+**Interfaz y distribución para Windows de Claimer Control:** [Rafael Caires](https://github.com/rafaelcairess).
 
-Las opciones avanzadas y todas las variables están en la [referencia principal](../README.md#configuration) y en [`.env.example`](../.env.example).
+Construido sobre [P-Adamiec/Free-Games-Claimer-Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster), mantenido por Paweł Adamiec y sus contribuidores. Ese proyecto fue inspirado por [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). Los avisos de terceros se encuentran en [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
 
-## Solución de problemas
-
-| Problema | Solución |
-|---|---|
-| Docker no inicia | Abre Docker Desktop, completa sus pantallas iniciales y ejecuta de nuevo el acceso directo. |
-| La tienda solicita 2FA o CAPTCHA | Abre **Navegador** y complétalo manualmente. El proyecto no intenta eludir desafíos de seguridad. |
-| El panel no abre | Comprueba que el contenedor `claimer-control` esté activo en Docker Desktop. |
-| El inicio de sesión no persiste | Comprueba que exista el volumen `claimer-control-data`. |
-| La actualización no se abre | Usa el acceso directo del menú Inicio y vuelve a intentarlo; el navegador puede pedir confirmar el protocolo local. |
-
-## Licencia y créditos
-
-Interfaz y distribución Claimer Control por [Rafael Caires](https://github.com/rafaelcairess). Motor basado en el proyecto de [Paweł Adamiec](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster) y sus contribuidores, inspirado en el proyecto Node.js de [vogler](https://github.com/vogler/free-games-claimer). Licencia [AGPL-3.0](../LICENSE).
+Distribuido bajo la [GNU Affero General Public License v3.0](../LICENSE).

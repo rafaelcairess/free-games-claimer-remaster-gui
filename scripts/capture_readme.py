@@ -34,18 +34,13 @@ async def main() -> None:
         await page.sleep(1)
         await page.evaluate("localStorage.setItem('claimer-control-language', 'pt-BR'); location.reload()")
         await page.sleep(1)
-        await shot(page, "01-language.png")
-
         await click(page, "#setupNext")
-        await shot(page, "02-security.png")
         await click(page, "#setupNext")
-        await shot(page, "03-stores.png")
         await click(page, "#setupNext")
         await click(page, ".help-button")
         await shot(page, "04-credentials.png")
 
         await click(page, "#setupNext")
-        await shot(page, "07-schedule.png")
         await click(page, "#setupNext")
         await click(page, "#setupNext")
         await page.sleep(1)
@@ -59,15 +54,6 @@ async def main() -> None:
           document.querySelector('.stores-section').scrollIntoView({block: 'center'});
         """)
         await shot(page, "06-aliexpress.png")
-
-        await page.evaluate("location.reload()")
-        await page.sleep(1)
-        await click(page, "#settingsButton")
-        await page.evaluate("""
-          [...document.querySelectorAll('.settings-nav-item')]
-            .find(button => button.dataset.section === 'section.browser')?.click();
-        """)
-        await shot(page, "08-browser.png")
     finally:
         browser.stop()
 

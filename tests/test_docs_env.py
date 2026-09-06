@@ -1,8 +1,4 @@
-"""Every setting must be documented in all three places.
-
-`VNC_LOGIN_TIMEOUT` lived in config.py and the README table but never reached
-.env.example; that silent gap is what these tests exist to catch.
-"""
+"""Keep the developer configuration reference and product README trustworthy."""
 
 import re
 from pathlib import Path
@@ -28,10 +24,6 @@ def _env_example_vars() -> set[str]:
     return set(re.findall(r"^#?\s*([A-Z_0-9]+)=", ENV_EXAMPLE, re.M))
 
 
-def _readme_vars() -> set[str]:
-    return set(re.findall(r"^\|\s*`([A-Z_0-9]+)`", README, re.M))
-
-
 class TestEverySettingIsDocumented:
     def test_the_scan_still_finds_settings(self):
         # Guards the regex itself: a rename in config.py must not empty this list.
@@ -41,32 +33,35 @@ class TestEverySettingIsDocumented:
     def test_it_is_in_env_example(self, name):
         assert name in _env_example_vars(), f"{name} is missing from .env.example"
 
-    @pytest.mark.parametrize("name", _config_vars())
-    def test_it_is_in_the_readme_table(self, name):
-        assert name in _readme_vars(), f"{name} is missing from the README config table"
-
-
 class TestNothingDocumentedThatDoesNotExist:
-    @pytest.mark.parametrize("source,names", [
-        (".env.example", _env_example_vars()),
-        ("README.md", _readme_vars()),
-    ])
-    def test_no_unknown_settings(self, source, names):
-        unknown = sorted(names - set(_config_vars()) - DOCKER_ONLY)
-        assert not unknown, f"{source} documents settings the code does not read: {unknown}"
+    def test_no_unknown_settings_in_env_example(self):
+        unknown = sorted(_env_example_vars() - set(_config_vars()) - DOCKER_ONLY)
+        assert not unknown, f".env.example documents settings the code does not read: {unknown}"
 
 
-class TestArchitectureTree:
-    """The README file tree is a map, an unlisted module makes it a wrong one."""
+class TestProductReadme:
+    """The landing page stays concise while detailed references remain discoverable."""
 
-    TREE = README.split("## Architecture", 1)[-1].split("###", 1)[0]
+    @pytest.mark.parametrize(
+        "target",
+        ["./.env.example", "./MODIFICATIONS.md", "./CHANGELOG.md", "./THIRD_PARTY_NOTICES.md"],
+    )
+    def test_developer_reference_exists_and_is_linked(self, target):
+        assert target in README
+        assert (ROOT / target.removeprefix("./")).is_file()
 
-    @pytest.mark.parametrize("module", sorted(p.name for p in (ROOT / "src" / "core").glob("*.py")
-                                              if p.name != "__init__.py"))
-    def test_every_core_module_is_listed(self, module):
-        assert module in self.TREE, f"src/core/{module} is missing from the README tree"
+    @pytest.mark.parametrize("translation", ["README.pt-BR.md", "README.es.md"])
+    def test_translated_readme_exists_and_is_linked(self, translation):
+        assert f"./docs/{translation}" in README
+        assert (ROOT / "docs" / translation).is_file()
 
-    @pytest.mark.parametrize("module", sorted(p.name for p in (ROOT / "src" / "stores").glob("*.py")
-                                              if p.name != "__init__.py"))
-    def test_every_store_module_is_listed(self, module):
-        assert module in self.TREE, f"src/stores/{module} is missing from the README tree"
+    def test_end_user_readme_does_not_duplicate_env_reference(self):
+        assert "Options are set via environment variables" not in README
+        assert "## Configuration" not in README
+        assert not re.search(r"^\|\s*`[A-Z_0-9]+`", README, re.M)
+
+    def test_product_promises_and_attribution_remain_visible(self):
+        assert "Claimer-Control-Setup.exe" in README
+        assert "Your data stays local" in README
+        assert "P-Adamiec/Free-Games-Claimer-Remaster" in README
+        assert "GNU Affero General Public License v3.0" in README
