@@ -28,6 +28,8 @@ class DashboardHTTPServer(ThreadingHTTPServer):
         status_callback: Callable[[], Awaitable[dict]],
         config_callback: Callable[[], Awaitable[dict]],
         save_callback: Callable[[dict], Awaitable[dict]],
+        setup_callback: Callable[[dict], Awaitable[dict]],
+        update_callback: Callable[[], Awaitable[dict]],
         run_callback: Callable[[list[str] | None], Awaitable[bool]],
     ) -> None:
         super().__init__(address, DashboardHandler)
@@ -35,6 +37,8 @@ class DashboardHTTPServer(ThreadingHTTPServer):
         self.status_callback = status_callback
         self.config_callback = config_callback
         self.save_callback = save_callback
+        self.setup_callback = setup_callback
+        self.update_callback = update_callback
         self.run_callback = run_callback
         self.csrf_token = secrets.token_urlsafe(32)
 
@@ -97,6 +101,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
             "/": ("index.html", "text/html; charset=utf-8"),
             "/assets/app.css": ("app.css", "text/css; charset=utf-8"),
             "/assets/app.js": ("app.js", "text/javascript; charset=utf-8"),
+            "/assets/i18n.js": ("i18n.js", "text/javascript; charset=utf-8"),
+            "/assets/locales/en.json": ("locales/en.json", "application/json; charset=utf-8"),
+            "/assets/locales/pt-BR.json": ("locales/pt-BR.json", "application/json; charset=utf-8"),
+            "/assets/locales/es.json": ("locales/es.json", "application/json; charset=utf-8"),
             "/assets/icons/steam.svg": ("icons/steam.svg", "image/svg+xml"),
             "/assets/icons/epicgames.svg": ("icons/epicgames.svg", "image/svg+xml"),
             "/assets/icons/gogdotcom.svg": ("icons/gogdotcom.svg", "image/svg+xml"),
@@ -125,6 +133,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self._json(self.server.await_result(self.server.status_callback()))
             elif path == "/api/config":
                 self._json(self.server.await_result(self.server.config_callback()))
+            elif path == "/api/update":
+                self._json(self.server.await_result(self.server.update_callback()))
             else:
                 self._serve_static(path)
         except Exception:
@@ -148,10 +158,16 @@ class DashboardHandler(BaseHTTPRequestHandler):
             elif path == "/api/config":
                 result = self.server.await_result(self.server.save_callback(payload.get("values")))
                 self._json(result)
+            elif path == "/api/setup":
+                result = self.server.await_result(self.server.setup_callback(payload.get("values")))
+                self._json(result)
             else:
                 self._json({"error": "Não encontrado"}, HTTPStatus.NOT_FOUND)
         except ValueError as exc:
-            self._json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+            self._json(
+                {"error": str(exc), "code": getattr(exc, "code", "error.invalidRequest")},
+                HTTPStatus.BAD_REQUEST,
+            )
         except Exception:
             logger.exception("Dashboard POST failed for %s", path)
             self._json({"error": "Falha interna no painel"}, HTTPStatus.INTERNAL_SERVER_ERROR)
@@ -164,6 +180,8 @@ def start_dashboard(
     status_callback: Callable[[], Awaitable[dict]],
     config_callback: Callable[[], Awaitable[dict]],
     save_callback: Callable[[dict], Awaitable[dict]],
+    setup_callback: Callable[[dict], Awaitable[dict]],
+    update_callback: Callable[[], Awaitable[dict]],
     run_callback: Callable[[list[str] | None], Awaitable[bool]],
 ) -> DashboardHTTPServer:
     """Start the dashboard server in a daemon thread."""
@@ -173,6 +191,8 @@ def start_dashboard(
         status_callback,
         config_callback,
         save_callback,
+        setup_callback,
+        update_callback,
         run_callback,
     )
     Thread(target=server.serve_forever, name="fgc-dashboard", daemon=True).start()

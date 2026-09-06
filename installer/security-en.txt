@@ -1,0 +1,7 @@
+CLAIMER CONTROL — LOCAL SECURITY
+
+Claimer Control runs the dashboard and browser automation on this computer through Docker. Rafael Caires and Claimer Control do not operate a server that receives your store credentials.
+
+Credentials entered in the dashboard are stored in the local Docker volume. When a store requires authentication, the automated browser sends those credentials directly to that store's official website, as a normal browser would. Saved secrets are never returned by the dashboard API.
+
+The installer may download Docker Desktop from its official source, request administrator permission and require a Windows restart. Claimer Control itself is unsigned; verify the SHA-256 checksum published with the GitHub Release.

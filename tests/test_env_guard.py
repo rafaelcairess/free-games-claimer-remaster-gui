@@ -57,8 +57,8 @@ class TestKnownSettings:
         assert kinds["STORES"] == "str"
 
     def test_docker_only_settings_count_as_known(self):
-        # FGC_TAG and VNC_PASSWORD are read by Docker, not by config.py.
-        assert {"FGC_TAG", "VNC_PASSWORD", "STORES"} <= C.known_env_names()
+        # CLAIMER_TAG and VNC_PASSWORD are read by Docker, not by config.py.
+        assert {"CLAIMER_TAG", "VNC_PASSWORD", "STORES"} <= C.known_env_names()
 
 
 class TestMasking:

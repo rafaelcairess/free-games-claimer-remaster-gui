@@ -76,7 +76,7 @@ async def fetch_latest_release() -> dict | None:
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.get(url, headers={
                 "Accept": "application/vnd.github+json",
-                "User-Agent": f"fgc-remaster/{__version__}",
+                "User-Agent": f"claimer-control/{__version__}",
             })
             resp.raise_for_status()
             data = resp.json()
@@ -102,8 +102,29 @@ def build_message(release: dict) -> str:
         f"🔄 **Update available: {release['tag']}**\n"
         f"You are running v{__version__}.\n"
         f"What changed: {release['url']}\n"
-        f"To update: `docker compose pull && docker compose up -d`"
+        f"Open Claimer Control to review and install the update."
     )
+
+
+async def get_update_status() -> dict:
+    """Return a small, dashboard-safe update description."""
+    release = await fetch_latest_release()
+    if release is None:
+        return {
+            "currentVersion": __version__,
+            "available": False,
+            "latestVersion": None,
+            "releaseUrl": f"{__repo__}/releases/latest",
+            "checkFailed": True,
+        }
+    available = _parse_version(release["version"]) > _parse_version(__version__)
+    return {
+        "currentVersion": __version__,
+        "available": available,
+        "latestVersion": release["version"],
+        "releaseUrl": release["url"],
+        "checkFailed": False,
+    }
 
 
 async def notify_if_update_available(*, at_startup: bool = False) -> None:

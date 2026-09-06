@@ -1,13 +1,25 @@
-# free-games-claimer-remaster
+# Claimer Control
 
 <p align="center">
-  <img alt="logo-free-games-claimer" src="https://user-images.githubusercontent.com/493741/214588518-a4c89998-127e-4a8c-9b1e-ee4a9d075715.png" />
+  <strong>A local control panel that collects free games and AliExpress daily coins for you.</strong><br>
+  <sub>The dashboard, account settings and browser sessions stay on your computer.</sub>
 </p>
 
-> **Not a fork** – a complete ground-up Python remaster inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). 
->
-> ℹ️ **Are you coming from the original Node.js version?**  
-> For a comprehensive, file-by-file breakdown of what changed, dropped features, stealth automation upgrades, and architectural differences, **please read [MODIFICATIONS.md](./MODIFICATIONS.md).**
+<p align="center">
+  <a href="./README.md">English</a> ·
+  <a href="./docs/README.pt-BR.md">Português do Brasil</a> ·
+  <a href="./docs/README.es.md">Español</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest/download/Claimer-Control-Setup.exe"><strong>Download for Windows</strong></a>
+  · <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest">Release notes &amp; SHA-256</a>
+</p>
+
+> [!IMPORTANT]
+> Claimer Control does not operate a credential server and includes no telemetry. Credentials entered in the local dashboard are stored in your local Docker volume and are sent only by the automated browser to each store's official login. See [Security](#security-and-credentials).
+
+Claimer Control is maintained by [Rafael Caires](https://github.com/rafaelcairess) and built on [P-Adamiec/Free-Games-Claimer-Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster), an independent Python rewrite inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). Original attribution and the AGPL-3.0 license are preserved.
 
 Automatically claims free games on:
 
@@ -40,17 +52,27 @@ Runs as a Docker container with a built-in scheduler (every 12 hours by default,
 
 ## Quick start
 
-### Prerequisites
+### Windows — recommended
+
+1. Download **[Claimer-Control-Setup.exe](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/latest/download/Claimer-Control-Setup.exe)** from the latest Release.
+2. Run the installer. If Docker Desktop is missing, Claimer Control explains why it is needed and installs it from Docker's official source after your confirmation.
+3. The local dashboard opens automatically. Follow the six-step setup wizard, choose your stores and optionally enter account credentials.
+
+The installer may request administrator permission and a Windows restart while Docker is installed. It resumes after sign-in, creates desktop and Start menu shortcuts, and can start Claimer Control with Windows. The application installer is currently unsigned, so Windows SmartScreen may show an unknown-publisher warning. Verify `SHA256SUMS.txt` from the same Release before continuing.
+
+### Linux, NAS or source installation
+
+#### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
 
 > 🟢 **New to Docker on Windows?** Read the step-by-step [**WINDOWS_BEGINNER_GUIDE.md**](./WINDOWS_BEGINNER_GUIDE.md) to set up Docker Desktop, optimize RAM limits, and use Dockhand to deploy this flawlessly.
 
-### 1. Clone and configure
+#### 1. Clone and configure
 
 ```bash
-git clone https://github.com/P-Adamiec/free-games-claimer-remaster.git
-cd free-games-claimer-remaster
+git clone https://github.com/rafaelcairess/free-games-claimer-remaster-gui.git
+cd free-games-claimer-remaster-gui
 cp .env.example .env  # or edit the existing .env
 ```
 
@@ -89,7 +111,7 @@ DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
 # STORES=steam,prime,gog
 ```
 
-### 2. Run container
+#### 2. Run container
 
 ```bash
 docker compose up -d
@@ -98,19 +120,17 @@ docker compose up -d
 When running directly from a source checkout after changing or updating the
 code, rebuild the local image first with `docker compose up -d --build app`.
 
-On Windows, you can instead double-click `Start-FGC-Control-Center.cmd`. The
-launcher starts Docker Desktop when necessary, starts the Compose service, and
-opens the local dashboard automatically.
+On Windows source checkouts, you can double-click `Start-Claimer-Control.cmd`.
 
-> 💡 **Want to test experimental development features?** Add `FGC_TAG=dev` to your `.env` file before running Docker to automatically download our pre-release build!
+> 💡 **Need a reproducible version?** Set `CLAIMER_TAG` to a published tag such as `v1.0.0` before starting Docker.
 
-### 3. Login (first run)
+#### 3. Login (first run)
 
 Open **http://localhost:7080** in your browser to access the VNC session.
 
 Each store will wait for you to login manually on the first run if you don't supply credentials. After that, session cookies are natively restored using persistent browser profiles!
 
-### Local dashboard
+#### Local dashboard
 
 Open **http://localhost:8080** to see each store's status, start all stores or
 just one store, open the browser session, and edit the supported settings.
@@ -121,12 +141,47 @@ leave a secret field blank to keep its current value. The Compose configuration
 binds this port to `127.0.0.1` by default, so the dashboard is available only on
 the computer running Docker. Do not expose port 8080 directly to the internet.
 
-### 4. Monitor
+On the packaged Windows install, the first opening shows a guided setup for language, privacy, stores, optional credentials and scheduling. Select **English**, **Português do Brasil** or **Español**, or keep the language detected from Windows and your browser. Every credential field has an accessible `?` explanation and supports manual login as an alternative.
+
+#### 4. Monitor
 
 To see what the bot is doing in real-time regardless of your current terminal folder, inspect the container directly:
 ```bash
 docker logs -f fgc-remaster
 ```
+
+## Security and credentials
+
+| Question | Answer |
+|---|---|
+| Does Claimer Control receive my passwords? | No. There is no Claimer Control or Rafael Caires server receiving dashboard data. |
+| Where are credentials saved? | In `gui.env` inside the local Docker volume, with restricted file permissions. |
+| Do credentials ever leave the computer? | Only when the automated browser sends them directly to the official store login, exactly as a normal browser must. |
+| Can the dashboard read saved passwords back? | No. Its API returns only whether each secret is configured. |
+| Is the dashboard public? | No. Docker binds it to `127.0.0.1` by default. Do not expose port 8080 to the internet. |
+| Is there telemetry? | No. External traffic is limited to stores, notifications you configure and update checks. |
+
+Account credentials are optional. You may leave them blank, open the visual browser, and sign in manually. Browser profiles persist locally, so most stores can reuse that session later. Protect your Windows account and disk: locally stored browser sessions and secrets are sensitive data.
+
+## Product tour
+
+All screenshots use synthetic accounts and sample results. No real account, token, cookie or local path is shown.
+
+| First-time setup | Local security |
+|---|---|
+| ![Choose a language](docs/images/01-language.png) | ![Understand local data storage](docs/images/02-security.png) |
+
+| Choose stores | Understand credential fields |
+|---|---|
+| ![Choose enabled stores](docs/images/03-stores.png) | ![Credential explanation tooltip](docs/images/04-credentials.png) |
+
+| Run dashboard | AliExpress coins |
+|---|---|
+| ![Dashboard with game results](docs/images/05-dashboard.png) | ![AliExpress balance and streak](docs/images/06-aliexpress.png) |
+
+| Scheduling | Manual browser login |
+|---|---|
+| ![Configure scheduling](docs/images/07-schedule.png) | ![Open the local visual browser](docs/images/08-browser.png) |
 
 ### 5. Unity, first run only
 
@@ -157,13 +212,14 @@ Options are set via environment variables in `.env`:
 
 | Variable | Default | Description |
 |---|---|---|
-| `FGC_TAG` | `latest` | Docker image tag to run (set to `dev` to test experimental pre-release builds). |
+| `CLAIMER_TAG` | `latest` | Claimer Control image tag. The Windows updater pins this to the selected Release. |
 | `SHOW` | `1` | Show browser window (VNC). |
 | `WIDTH` | `1280` | Browser/VNC screen width. |
 | `HEIGHT` | `720` | Browser/VNC screen height. |
 | `NOVNC_PORT` | `7080` | noVNC web access port. |
 | `GUI_ENABLED` | `true` | Enable the local control dashboard. |
 | `GUI_PORT` | `8080` | Host port for the local dashboard, bound to `127.0.0.1` by Docker Compose. |
+| `GUI_SETUP_REQUIRED` | `false` | Pause automatic runs until the local onboarding wizard is complete. Enabled by the Windows installer. |
 | `VNC_IP` | `localhost`| Host for VNC notification links. Alerts include a one-click `http://<VNC_IP>:<NOVNC_PORT>/?autoconnect=true`. |
 | `VNC_URL` | | Full public noVNC address for notification links, e.g. `https://fgc.example.tld`. Use it behind a reverse proxy: it keeps your scheme and drops the port, replacing `VNC_IP` and `NOVNC_PORT` in the link (`NOVNC_PORT` still publishes the container port). |
 | `VNC_PASSWORD` | | Optional password for VNC access (empty = no password). |
@@ -301,9 +357,10 @@ to redeem it.
 ## Architecture
 
 ```
-free-games-claimer-remaster/
+claimer-control/
 ├── main.py                 # Entry point + scheduler + CLI + run summary
 ├── docker-compose.yml      # Container configuration
+├── installer/              # Localized Windows launcher + Inno Setup package
 ├── Dockerfile              # Debian bookworm-slim + Chrome/Chromium + TurboVNC + noVNC
 ├── docker-entrypoint.sh    # Starts the virtual display, VNC and the bot
 ├── requirements.txt        # Python dependencies
@@ -318,6 +375,7 @@ free-games-claimer-remaster/
 │   └── screenshots/<store>/# Screenshots taken on failures
 ├── src/
 │   ├── version.py          # Version string
+│   ├── gui/                # Local dashboard, settings API and three locales
 │   ├── core/               # Shared engine components
 │   │   ├── claimer.py      # BaseClaimer: browser launch, login waits, notifications
 │   │   ├── config.py       # Typed configuration loader (.env → Python)
@@ -401,8 +459,9 @@ Please switch both off again once the problem is solved.
 
 ## Credits
 
-Inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer) – the original Node.js project.
-This remaster is a **completely independent rewrite** in Python, not a fork.
+**Claimer Control interface and Windows distribution:** [Rafael Caires](https://github.com/rafaelcairess).
+
+Built on [P-Adamiec/Free-Games-Claimer-Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster), the independent Python rewrite maintained by Paweł Adamiec and its contributors. That project was inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). See the Git history and [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for complete attribution.
 
 ---
 
@@ -414,12 +473,4 @@ This remaster is a **completely independent rewrite** in Python, not a fork.
 
 ## Analytics
 
-[![Star History Chart](https://api.star-history.com/svg?repos=P-Adamiec/Free-Games-Claimer-Remaster&type=Date)](https://www.star-history.com/?repos=P-Adamiec%2FFree-Games-Claimer-Remaster&type=date&legend=bottom-right)
-
-![Alt](https://repobeats.axiom.co/api/embed/5c6416eef2d3371808c7d1d50418546103b351f4.svg "Repobeats analytics image")
-
----
-
-<p align="center">
-<img alt="logo-fgc-remaster" src="logo.png" width="256" />
-</p>
+[![Star History Chart](https://api.star-history.com/svg?repos=rafaelcairess/free-games-claimer-remaster-gui&type=Date)](https://www.star-history.com/?repos=rafaelcairess%2Ffree-games-claimer-remaster-gui&type=date&legend=bottom-right)

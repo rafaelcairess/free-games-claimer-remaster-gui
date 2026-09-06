@@ -115,6 +115,7 @@ class DashboardState:
                 "key": key,
                 "state": "idle",
                 "message": "Aguardando execução",
+                "messageKey": "status.waiting",
                 "lastRun": None,
                 "details": None,
             }
@@ -127,12 +128,16 @@ class DashboardState:
             self._started_at = _now()
             for key in store_keys:
                 if key in self._stores:
-                    self._stores[key].update(state="queued", message="Na fila", details=None)
+                    self._stores[key].update(
+                        state="queued", message="Na fila", messageKey="status.queued", details=None
+                    )
 
     def begin_store(self, key: str) -> None:
         with self._lock:
             if key in self._stores:
-                self._stores[key].update(state="running", message="Executando agora", details=None)
+                self._stores[key].update(
+                    state="running", message="Executando agora", messageKey="status.runningNow", details=None
+                )
 
     def finish_store(
         self,
@@ -141,12 +146,20 @@ class DashboardState:
         *,
         failed: bool = False,
         details: dict | None = None,
+        message_key: str | None = None,
     ) -> None:
         with self._lock:
             if key in self._stores:
                 self._stores[key].update(
                     state="error" if failed else "success",
                     message=message,
+                    messageKey=message_key or (
+                        "status.failed" if failed else (
+                            "status.resultCoins" if details and details.get("kind") == "coins" else
+                            "status.resultGames" if details and details.get("kind") == "games" else
+                            "status.completedNoChanges"
+                        )
+                    ),
                     lastRun=_now(),
                     details=deepcopy(details),
                 )

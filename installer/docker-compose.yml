@@ -1,0 +1,29 @@
+name: claimer-control
+
+services:
+  app:
+    image: ghcr.io/rafaelcairess/free-games-claimer-remaster-gui:${CLAIMER_TAG:-v1.0.0}
+    container_name: claimer-control
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    ports:
+      - "${NOVNC_PORT:-7080}:7080"
+      - "127.0.0.1:${GUI_PORT:-8080}:8080"
+    volumes:
+      - claimer_data:/fgc/data
+    environment:
+      GUI_ENABLED: "true"
+      GUI_SETUP_REQUIRED: "true"
+      GUI_PORT: "8080"
+      RUN_ON_STARTUP: "true"
+      NOTIFY_UPDATES: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep python3 && curl --fail http://localhost:8080/api/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  claimer_data:
+    name: ${CLAIMER_DATA_VOLUME:-claimer-control-data}
