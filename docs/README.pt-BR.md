@@ -27,7 +27,8 @@
 </p>
 
 > [!NOTE]
-> **O Lontrium Control v1.0.0 já está disponível.** Baixe o instalador acima e confira-o usando o arquivo [`SHA256SUMS.txt`](https://github.com/rafaelcairess/lontrium/releases/latest/download/SHA256SUMS.txt).
+> **O Lontrium Control v1.0.0 já está disponível.** Baixe o instalador acima
+> (https://github.com/rafaelcairess/lontrium/releases/latest/download/SHA256SUMS.txt).
 
 <p align="center">
   <img src="images/05-dashboard.png" alt="Painel do Lontrium Control mostrando jogos e resultados do AliExpress" width="1100">
