@@ -1,4 +1,4 @@
-# Claimer Control
+<h1 align="center">🎮 Claimer Control</h1>
 
 <p align="center">
   <strong>Tus juegos gratuitos y recompensas diarias en un panel local y privado.</strong><br>
@@ -6,12 +6,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/actions/workflows/release.yml"><img alt="Pruebas" src="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/actions/workflows/release.yml/badge.svg"></a>
-  <a href="../LICENSE"><img alt="Licencia AGPL-3.0" src="https://img.shields.io/github/license/rafaelcairess/free-games-claimer-remaster-gui?style=flat-square"></a>
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white">
-  <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=flat-square&logo=docker&logoColor=white">
-  <img alt="Google Chrome" src="https://img.shields.io/badge/Google%20Chrome-4285F4?style=flat-square&logo=googlechrome&logoColor=white">
+  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/actions/workflows/release.yml"><img alt="Pruebas" src="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/actions/workflows/release.yml/badge.svg?style=for-the-badge"></a>
+  <a href="../LICENSE"><img alt="Licencia AGPL-3.0" src="https://img.shields.io/github/license/rafaelcairess/free-games-claimer-remaster-gui?style=for-the-badge"></a>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+  <img alt="Google Chrome" src="https://img.shields.io/badge/Google%20Chrome-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white">
 </p>
 
 <p align="center">
@@ -27,7 +27,9 @@
 > [!NOTE]
 > El instalador para Windows estará disponible en Releases con la versión `v1.0.0`. Hasta que se publique, este repositorio contiene la versión de desarrollo.
 
-![Panel de Claimer Control con resultados de juegos y AliExpress](images/05-dashboard.png)
+<p align="center">
+  <img src="images/05-dashboard.png" alt="Panel de Claimer Control con resultados de juegos y AliExpress" width="1100">
+</p>
 
 ## Qué hace
 
@@ -74,9 +76,17 @@ Las credenciales son opcionales y el acceso manual mediante el navegador siempre
 
 Solo las tiendas habilitadas aparecen en el panel. Cada fila explica qué ocurrió: qué juego fue reclamado, cuál ya estaba en la biblioteca, si no había promoción o cuántas monedas de AliExpress fueron recogidas.
 
-| Configuración guiada de la cuenta | Detalles de monedas de AliExpress |
-|---|---|
-| ![Campo de credenciales con explicación de privacidad](images/04-credentials.png) | ![Monedas diarias, saldo y racha de AliExpress](images/06-aliexpress.png) |
+### Configuración guiada de la cuenta
+
+<p align="center">
+  <img src="images/04-credentials.png" alt="Campo de credenciales con explicación de privacidad" width="1000">
+</p>
+
+### Detalles de monedas de AliExpress
+
+<p align="center">
+  <img src="images/06-aliexpress.png" alt="Monedas diarias, saldo y racha de AliExpress" width="1000">
+</p>
 
 Cada credencial tiene una explicación accesible en el botón `?`. La interfaz funciona con ratón, teclado y toque, y está completamente traducida al inglés, portugués de Brasil y español.
 
