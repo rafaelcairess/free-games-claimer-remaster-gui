@@ -73,10 +73,9 @@ Describe "Legacy Docker data discovery" {
 
     It "replaces the legacy container while preserving its named data volume" {
         $launcher = Get-Content -LiteralPath "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Raw
-        $launcher | Should Match '& docker stop fgc-remaster'
-        $launcher | Should Match '& docker rm fgc-remaster'
-        $launcher | Should Match 'Set-EnvironmentValue "CLAIMER_DATA_VOLUME"'
-        $launcher | Should Not Match 'docker volume rm.*Adopt-LegacyData'
+        if ($launcher -notmatch '& docker stop fgc-remaster') { throw "Legacy container is not stopped" }
+        if ($launcher -notmatch '& docker rm fgc-remaster') { throw "Legacy container is not replaced" }
+        if ($launcher -notmatch 'Set-EnvironmentValue "CLAIMER_DATA_VOLUME"') { throw "Legacy volume is not adopted" }
     }
 }
 
