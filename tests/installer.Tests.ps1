@@ -70,6 +70,14 @@ Describe "Legacy Docker data discovery" {
         [string]$volume = Get-LegacyDataVolumeFromInspect '[{"Mounts":[]}]'
         if ($volume -ne "") { throw "Expected no legacy volume, got $volume" }
     }
+
+    It "replaces the legacy container while preserving its named data volume" {
+        $launcher = Get-Content -LiteralPath "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Raw
+        $launcher | Should Match '& docker stop fgc-remaster'
+        $launcher | Should Match '& docker rm fgc-remaster'
+        $launcher | Should Match 'Set-EnvironmentValue "CLAIMER_DATA_VOLUME"'
+        $launcher | Should Not Match 'docker volume rm.*Adopt-LegacyData'
+    }
 }
 
 Describe "Local dashboard readiness" {

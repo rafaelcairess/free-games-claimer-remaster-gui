@@ -36,7 +36,7 @@ $Messages = @{
         Updating = "Installing update {0}..."
         UpdateInvalid = "GitHub returned an invalid version. The update was stopped."
         LegacyFound = "An existing Free Games Claimer installation was found. Reuse its local accounts and browser sessions? [Y/n]"
-        LegacyAdopted = "Existing local data will be reused. The old container was stopped, not deleted."
+        LegacyAdopted = "Existing local data will be reused. The old container was replaced; its local data was preserved."
         CheckOk = "Launcher files are valid."
         Failed = "Claimer Control could not finish: {0}"
     }
@@ -64,7 +64,7 @@ $Messages = @{
         Updating = "Instalando a atualização {0}..."
         UpdateInvalid = "O GitHub retornou uma versão inválida. A atualização foi interrompida."
         LegacyFound = "Uma instalação anterior do Free Games Claimer foi encontrada. Reutilizar contas e sessões locais? [S/n]"
-        LegacyAdopted = "Os dados locais existentes serão reutilizados. O container antigo foi parado, não apagado."
+        LegacyAdopted = "Os dados locais existentes serão reutilizados. O container antigo foi substituído; os dados locais foram preservados."
         CheckOk = "Os arquivos do inicializador são válidos."
         Failed = "O Claimer Control não conseguiu concluir: {0}"
     }
@@ -92,7 +92,7 @@ $Messages = @{
         Updating = "Instalando la actualización {0}..."
         UpdateInvalid = "GitHub devolvió una versión no válida. La actualización se detuvo."
         LegacyFound = "Se encontró una instalación anterior de Free Games Claimer. ¿Reutilizar sus cuentas y sesiones locales? [S/n]"
-        LegacyAdopted = "Se reutilizarán los datos locales existentes. El contenedor anterior se detuvo, no se eliminó."
+        LegacyAdopted = "Se reutilizarán los datos locales existentes. Se reemplazó el contenedor anterior y se conservaron sus datos locales."
         CheckOk = "Los archivos del iniciador son válidos."
         Failed = "Claimer Control no pudo finalizar: {0}"
     }
@@ -250,6 +250,9 @@ function Adopt-LegacyData {
     if ($legacy -eq (Get-EnvironmentValue "CLAIMER_DATA_VOLUME")) { return }
     if (Confirm-DefaultYes $Script:Text.LegacyFound) {
         & docker stop fgc-remaster *> $null
+        if ($LASTEXITCODE -ne 0) { throw "Could not stop the existing fgc-remaster container" }
+        & docker rm fgc-remaster *> $null
+        if ($LASTEXITCODE -ne 0) { throw "Could not replace the existing fgc-remaster container" }
         Set-EnvironmentValue "CLAIMER_DATA_VOLUME" $legacy
         Write-Host $Script:Text.LegacyAdopted -ForegroundColor Green
     }
