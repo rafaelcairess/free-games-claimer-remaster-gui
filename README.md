@@ -1,3 +1,5 @@
+<div align="center">
+  
 # Claimer Control
 
 <p align="center">
