@@ -14,7 +14,7 @@ from src.version import __version__
 
 RELEASE_JSON = {
     "tag_name": "v1.6",
-    "html_url": "https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases/tag/v1.6",
+    "html_url": "https://github.com/rafaelcairess/lontrium/releases/tag/v1.6",
     "name": "v1.6",
 }
 
@@ -79,7 +79,7 @@ class TestVersionParsing:
 class TestReleasesUrl:
     def test_built_from_the_repo_link(self):
         assert updates._releases_url() == (
-            "https://api.github.com/repos/rafaelcairess/free-games-claimer-remaster-gui/releases/latest"
+            "https://api.github.com/repos/rafaelcairess/lontrium/releases/latest"
         )
 
 
@@ -89,7 +89,7 @@ class TestMessage:
         assert "v1.6" in message
         assert f"v{__version__}" in message
         assert RELEASE_JSON["html_url"] in message
-        assert "Open Claimer Control" in message
+        assert "Open Lontrium Control" in message
 
 
 class TestDashboardUpdateStatus:

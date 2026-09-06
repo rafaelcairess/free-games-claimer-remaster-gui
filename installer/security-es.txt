@@ -1,7 +1,7 @@
-CLAIMER CONTROL — SEGURIDAD LOCAL
+LONTRIUM CONTROL — SEGURIDAD LOCAL
 
-Claimer Control ejecuta el panel y la automatización del navegador en este equipo mediante Docker. Rafael Caires y Claimer Control no mantienen un servidor que reciba las credenciales de tus tiendas.
+Lontrium Control ejecuta el panel y la automatización del navegador en este equipo mediante Docker. Rafael Caires y Lontrium Control no mantienen un servidor que reciba las credenciales de tus tiendas.
 
 Las credenciales introducidas en el panel se guardan en el volumen Docker local. Cuando una tienda requiere autenticación, el navegador automatizado envía esos datos directamente al sitio oficial de esa tienda, como un navegador normal. Los secretos guardados nunca son devueltos por la API del panel.
 
-El instalador puede descargar Docker Desktop desde su fuente oficial, solicitar permisos de administrador y requerir un reinicio de Windows. Claimer Control no está firmado; comprueba el SHA-256 publicado con la Release de GitHub.
+El instalador puede descargar Docker Desktop desde su fuente oficial, solicitar permisos de administrador y requerir un reinicio de Windows. Lontrium Control no está firmado; comprueba el SHA-256 publicado con la Release de GitHub.

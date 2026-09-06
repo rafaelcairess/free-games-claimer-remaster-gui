@@ -1,4 +1,4 @@
 @echo off
-setlocal
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\Start-ClaimerControl.ps1" -Action source
+rem Compatibility shortcut. New source checkouts use Start-Lontrium.cmd.
+call "%~dp0Start-Lontrium.cmd"
 if errorlevel 1 pause

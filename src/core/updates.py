@@ -76,7 +76,7 @@ async def fetch_latest_release() -> dict | None:
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.get(url, headers={
                 "Accept": "application/vnd.github+json",
-                "User-Agent": f"claimer-control/{__version__}",
+                "User-Agent": f"lontrium/{__version__}",
             })
             resp.raise_for_status()
             data = resp.json()
@@ -102,7 +102,7 @@ def build_message(release: dict) -> str:
         f"🔄 **Update available: {release['tag']}**\n"
         f"You are running v{__version__}.\n"
         f"What changed: {release['url']}\n"
-        f"Open Claimer Control to review and install the update."
+        f"Open Lontrium Control to review and install the update."
     )
 
 

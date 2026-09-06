@@ -1,4 +1,4 @@
-Describe "Claimer Control launcher flow" {
+Describe "Lontrium Control launcher flow" {
     BeforeAll {
         . "$PSScriptRoot/../installer/Start-ClaimerControl.ps1" -Action start -Language en
     }
@@ -107,10 +107,16 @@ Describe "Local dashboard readiness" {
 }
 
 Describe "Application identity" {
-    It "uses the Claimer Control icon for setup and shortcuts" {
+    It "uses the Lontrium Control icon for setup and shortcuts" {
         $installer = Get-Content -LiteralPath "$PSScriptRoot/../installer/ClaimerControl.iss" -Raw
-        if ($installer -notmatch 'SetupIconFile=ClaimerControl\.ico') { throw "Setup icon is not configured" }
-        if ($installer -notmatch 'IconFilename: "\{app\}\\ClaimerControl\.ico"') { throw "Shortcut icon is not configured" }
-        if (-not (Test-Path -LiteralPath "$PSScriptRoot/../installer/ClaimerControl.ico")) { throw "Installer icon is missing" }
+        if ($installer -notmatch 'SetupIconFile=Lontrium\.ico') { throw "Setup icon is not configured" }
+        if ($installer -notmatch 'IconFilename: "\{app\}\\Lontrium\.ico"') { throw "Shortcut icon is not configured" }
+        if (-not (Test-Path -LiteralPath "$PSScriptRoot/../installer/Lontrium.ico")) { throw "Installer icon is missing" }
+    }
+
+    It "registers Lontrium updates and preserves the former protocol alias" {
+        $installer = Get-Content -LiteralPath "$PSScriptRoot/../installer/ClaimerControl.iss" -Raw
+        if ($installer -notmatch 'Software\\Classes\\lontrium') { throw "Lontrium update protocol is not configured" }
+        if ($installer -notmatch 'Software\\Classes\\claimer-control') { throw "Legacy update protocol alias is missing" }
     }
 }

@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
     [ValidateSet("start", "source", "update", "uninstall", "check")]
     [string]$Action = "start",
@@ -13,88 +13,88 @@ $ProgressPreference = "SilentlyContinue"
 
 $Messages = @{
     en = @{
-        Title = "Claimer Control"
-        DockerMissing = "Docker Desktop is required. Claimer Control can install it from the official source now."
+        Title = "Lontrium Control"
+        DockerMissing = "Docker Desktop is required. Lontrium Control can install it from the official source now."
         InstallPrompt = "Install Docker Desktop? [Y/n]"
         InstallCancelled = "Installation cancelled. No changes were made."
         InstallingWinget = "Installing Docker Desktop with Windows Package Manager..."
         DownloadingDocker = "Windows Package Manager is unavailable. Downloading Docker Desktop from Docker's official website..."
         InvalidSignature = "The Docker installer does not have a valid Docker Inc. digital signature. Installation was stopped."
-        RestartNeeded = "Windows must restart to finish Docker setup. Claimer Control will continue automatically after sign-in."
+        RestartNeeded = "Windows must restart to finish Docker setup. Lontrium Control will continue automatically after sign-in."
         StartingDocker = "Starting Docker Desktop..."
         WaitingDocker = "Waiting for Docker Desktop to become ready"
-        DockerTimeout = "Docker Desktop did not become ready in time. Open Docker Desktop, finish its first-run screens, then use the Claimer Control shortcut again."
-        Pulling = "Downloading the Claimer Control application..."
-        Starting = "Starting Claimer Control..."
-        StartingSource = "Building and starting Claimer Control from this source folder..."
+        DockerTimeout = "Docker Desktop did not become ready in time. Open Docker Desktop, finish its first-run screens, then use the Lontrium Control shortcut again."
+        Pulling = "Downloading the Lontrium Control application..."
+        Starting = "Starting Lontrium Control..."
+        StartingSource = "Building and starting Lontrium Control from this source folder..."
         WaitingPanel = "Waiting for the local dashboard"
         PanelTimeout = "The container started, but the local dashboard did not respond. Open Docker Desktop and check the claimer-control container."
-        Ready = "Claimer Control is ready. Opening the local dashboard..."
-        UpdateCheck = "Checking the official Claimer Control Release..."
-        UpToDate = "Claimer Control is already up to date."
+        Ready = "Lontrium Control is ready. Opening the local dashboard..."
+        UpdateCheck = "Checking the official Lontrium Control Release..."
+        UpToDate = "Lontrium Control is already up to date."
         UpdatePrompt = "Update from {0} to {1}? [Y/n]"
         Updating = "Installing update {0}..."
         UpdateInvalid = "GitHub returned an invalid version. The update was stopped."
         LegacyFound = "An existing Free Games Claimer installation was found. Reuse its local accounts and browser sessions? [Y/n]"
         LegacyAdopted = "Existing local data will be reused. The old container was replaced; its local data was preserved."
         CheckOk = "Launcher files are valid."
-        Failed = "Claimer Control could not finish: {0}"
+        Failed = "Lontrium Control could not finish: {0}"
     }
     "pt-BR" = @{
-        Title = "Claimer Control"
-        DockerMissing = "O Docker Desktop é necessário. O Claimer Control pode instalá-lo agora pela fonte oficial."
+        Title = "Lontrium Control"
+        DockerMissing = "O Docker Desktop é necessário. O Lontrium Control pode instalá-lo agora pela fonte oficial."
         InstallPrompt = "Instalar o Docker Desktop? [S/n]"
         InstallCancelled = "Instalação cancelada. Nenhuma alteração foi feita."
         InstallingWinget = "Instalando o Docker Desktop pelo Gerenciador de Pacotes do Windows..."
         DownloadingDocker = "O Gerenciador de Pacotes não está disponível. Baixando o Docker Desktop pelo site oficial da Docker..."
         InvalidSignature = "O instalador do Docker não possui uma assinatura digital válida da Docker Inc. A instalação foi interrompida."
-        RestartNeeded = "O Windows precisa reiniciar para concluir o Docker. O Claimer Control continuará automaticamente após o login."
+        RestartNeeded = "O Windows precisa reiniciar para concluir o Docker. O Lontrium Control continuará automaticamente após o login."
         StartingDocker = "Iniciando o Docker Desktop..."
         WaitingDocker = "Aguardando o Docker Desktop ficar pronto"
-        DockerTimeout = "O Docker Desktop não ficou pronto a tempo. Abra o Docker Desktop, conclua as telas iniciais e use novamente o atalho do Claimer Control."
-        Pulling = "Baixando o aplicativo Claimer Control..."
-        Starting = "Iniciando o Claimer Control..."
-        StartingSource = "Preparando e iniciando o Claimer Control a partir desta pasta..."
+        DockerTimeout = "O Docker Desktop não ficou pronto a tempo. Abra o Docker Desktop, conclua as telas iniciais e use novamente o atalho do Lontrium Control."
+        Pulling = "Baixando o aplicativo Lontrium Control..."
+        Starting = "Iniciando o Lontrium Control..."
+        StartingSource = "Preparando e iniciando o Lontrium Control a partir desta pasta..."
         WaitingPanel = "Aguardando o painel local"
         PanelTimeout = "O container iniciou, mas o painel local não respondeu. Abra o Docker Desktop e verifique o container claimer-control."
-        Ready = "Claimer Control pronto. Abrindo o painel local..."
-        UpdateCheck = "Consultando a Release oficial do Claimer Control..."
-        UpToDate = "O Claimer Control já está atualizado."
+        Ready = "Lontrium Control pronto. Abrindo o painel local..."
+        UpdateCheck = "Consultando a Release oficial do Lontrium Control..."
+        UpToDate = "O Lontrium Control já está atualizado."
         UpdatePrompt = "Atualizar da versão {0} para {1}? [S/n]"
         Updating = "Instalando a atualização {0}..."
         UpdateInvalid = "O GitHub retornou uma versão inválida. A atualização foi interrompida."
         LegacyFound = "Uma instalação anterior do Free Games Claimer foi encontrada. Reutilizar contas e sessões locais? [S/n]"
         LegacyAdopted = "Os dados locais existentes serão reutilizados. O container antigo foi substituído; os dados locais foram preservados."
         CheckOk = "Os arquivos do inicializador são válidos."
-        Failed = "O Claimer Control não conseguiu concluir: {0}"
+        Failed = "O Lontrium Control não conseguiu concluir: {0}"
     }
     es = @{
-        Title = "Claimer Control"
-        DockerMissing = "Docker Desktop es necesario. Claimer Control puede instalarlo ahora desde la fuente oficial."
+        Title = "Lontrium Control"
+        DockerMissing = "Docker Desktop es necesario. Lontrium Control puede instalarlo ahora desde la fuente oficial."
         InstallPrompt = "¿Instalar Docker Desktop? [S/n]"
         InstallCancelled = "Instalación cancelada. No se realizó ningún cambio."
         InstallingWinget = "Instalando Docker Desktop con el Administrador de paquetes de Windows..."
         DownloadingDocker = "El Administrador de paquetes no está disponible. Descargando Docker Desktop desde el sitio oficial de Docker..."
         InvalidSignature = "El instalador de Docker no tiene una firma digital válida de Docker Inc. La instalación se detuvo."
-        RestartNeeded = "Windows debe reiniciarse para completar Docker. Claimer Control continuará automáticamente después de iniciar sesión."
+        RestartNeeded = "Windows debe reiniciarse para completar Docker. Lontrium Control continuará automáticamente después de iniciar sesión."
         StartingDocker = "Iniciando Docker Desktop..."
         WaitingDocker = "Esperando a que Docker Desktop esté listo"
-        DockerTimeout = "Docker Desktop no estuvo listo a tiempo. Ábrelo, completa sus pantallas iniciales y vuelve a usar el acceso directo de Claimer Control."
-        Pulling = "Descargando la aplicación Claimer Control..."
-        Starting = "Iniciando Claimer Control..."
-        StartingSource = "Preparando e iniciando Claimer Control desde esta carpeta..."
+        DockerTimeout = "Docker Desktop no estuvo listo a tiempo. Ábrelo, completa sus pantallas iniciales y vuelve a usar el acceso directo de Lontrium Control."
+        Pulling = "Descargando la aplicación Lontrium Control..."
+        Starting = "Iniciando Lontrium Control..."
+        StartingSource = "Preparando e iniciando Lontrium Control desde esta carpeta..."
         WaitingPanel = "Esperando el panel local"
         PanelTimeout = "El contenedor se inició, pero el panel local no respondió. Abre Docker Desktop y comprueba el contenedor claimer-control."
-        Ready = "Claimer Control está listo. Abriendo el panel local..."
-        UpdateCheck = "Consultando la Release oficial de Claimer Control..."
-        UpToDate = "Claimer Control ya está actualizado."
+        Ready = "Lontrium Control está listo. Abriendo el panel local..."
+        UpdateCheck = "Consultando la Release oficial de Lontrium Control..."
+        UpToDate = "Lontrium Control ya está actualizado."
         UpdatePrompt = "¿Actualizar de la versión {0} a {1}? [S/n]"
         Updating = "Instalando la actualización {0}..."
         UpdateInvalid = "GitHub devolvió una versión no válida. La actualización se detuvo."
         LegacyFound = "Se encontró una instalación anterior de Free Games Claimer. ¿Reutilizar sus cuentas y sesiones locales? [S/n]"
         LegacyAdopted = "Se reutilizarán los datos locales existentes. Se reemplazó el contenedor anterior y se conservaron sus datos locales."
         CheckOk = "Los archivos del iniciador son válidos."
-        Failed = "Claimer Control no pudo finalizar: {0}"
+        Failed = "Lontrium Control no pudo finalizar: {0}"
     }
 }
 
@@ -116,7 +116,7 @@ if ($Action -eq "source") {
     $EnvironmentFile = Join-Path $sourceRoot ".env"
 }
 $PanelUrl = "http://127.0.0.1:8080"
-$ReleaseApi = "https://api.github.com/repos/rafaelcairess/free-games-claimer-remaster-gui/releases/latest"
+$ReleaseApi = "https://api.github.com/repos/rafaelcairess/lontrium/releases/latest"
 
 function Write-Step([string]$Message) {
     Write-Host "`n> $Message" -ForegroundColor Cyan
@@ -291,7 +291,7 @@ function Wait-Panel {
 
 function Get-LatestReleaseTag {
     Write-Step $Script:Text.UpdateCheck
-    $release = Invoke-RestMethod -Uri $ReleaseApi -Headers @{Accept = "application/vnd.github+json"; "User-Agent" = "claimer-control-launcher/1.0.0"} -TimeoutSec 15
+    $release = Invoke-RestMethod -Uri $ReleaseApi -Headers @{Accept = "application/vnd.github+json"; "User-Agent" = "lontrium-launcher/1.0.0"} -TimeoutSec 15
     $tag = [string]$release.tag_name
     if ($tag -notmatch "^v\d+\.\d+\.\d+$") { throw $Script:Text.UpdateInvalid }
     return $tag

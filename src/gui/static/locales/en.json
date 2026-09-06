@@ -1,5 +1,5 @@
 {
-  "app": {"title": "Claimer Control", "local": "LOCAL", "by": "by Rafael Caires", "originalProject": "Original project"},
+  "app": {"title": "Lontrium Control", "local": "LOCAL", "by": "by Rafael Caires", "originalProject": "Original project"},
   "common": {"close": "Close", "cancel": "Cancel", "save": "Save", "continue": "Continue", "back": "Back", "never": "Never", "configured": "configured", "optional": "optional"},
   "nav": {"browser": "Browser", "settings": "Settings", "language": "Language"},
   "dashboard": {
@@ -12,7 +12,7 @@
   "history": {"title": "Recent activity", "copy": "Saved locally for 90 days, without account data or raw logs.", "empty": "Completed runs will appear here."},
   "security": {
     "title": "Your data stays on this computer",
-    "summary": "The dashboard, settings and browser sessions run locally. Claimer Control and Rafael Caires do not operate a server that receives your credentials.",
+    "summary": "The dashboard, settings and browser sessions run locally. Lontrium Control and Rafael Caires do not operate a server that receives your credentials.",
     "scope": "External connections: official stores, notifications you configure and update checks.",
     "honest": "Credentials are stored locally in the Docker volume. When a login is needed, the automated browser sends them directly to the official store, just as a normal browser would.",
     "notEncrypted": "Saved secrets are not sent back to the dashboard after saving. Protect access to your Windows account and computer."
@@ -81,13 +81,13 @@
     "indiegala": {"purpose": "Used only for eligible IndieGala giveaways. It stays locally and is sent only to IndieGala's official login."}
   },
   "onboarding": {
-    "eyebrow": "FIRST-TIME SETUP", "title": "Welcome to Claimer Control", "intro": "Configure your local automation in a few clear steps.",
+    "eyebrow": "FIRST-TIME SETUP", "title": "Welcome to Lontrium Control", "intro": "Configure your local automation in a few clear steps.",
     "stepLanguage": "Language", "stepSecurity": "Security", "stepStores": "Stores", "stepAccounts": "Accounts", "stepSchedule": "Schedule", "stepReview": "Review",
     "languageTitle": "Choose your language", "languageCopy": "We selected the language detected from Windows and your browser. You can change it at any time.",
-    "securityTitle": "Private by design", "securityCopy": "Claimer Control runs on this computer. Read exactly where account data is stored and when it is used.",
+    "securityTitle": "Private by design", "securityCopy": "Lontrium Control runs on this computer. Read exactly where account data is stored and when it is used.",
     "storesTitle": "Choose your stores", "storesCopy": "Only selected stores appear on the dashboard and participate in automation.",
     "accountsTitle": "Connect your accounts", "accountsCopy": "Credentials are optional. Leave fields blank and use the visual browser for manual login if you prefer.",
-    "scheduleTitle": "Choose automation", "scheduleCopy": "Set the interval and whether the first check runs when Claimer Control starts.",
+    "scheduleTitle": "Choose automation", "scheduleCopy": "Set the interval and whether the first check runs when Lontrium Control starts.",
     "reviewTitle": "Ready to run locally", "reviewCopy": "Review your choices. You can change every setting later.",
     "finish": "Finish and run", "selectedStores": "Selected stores", "credentialsConfigured": "Accounts filled now", "interval": "Run interval", "hours": "every {count} hours",
     "manualSchedule": "manual or fixed times only", "localOnly": "Dashboard available only on this computer"

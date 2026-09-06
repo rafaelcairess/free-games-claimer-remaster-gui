@@ -465,7 +465,8 @@ h1, h2, h3, .brand-name, .store-name {
 .onboarding-sidebar li.active { color: var(--text); }
 .onboarding-sidebar li.active > span:first-child { color: var(--view); background: var(--accent); border-color: var(--accent); }
 .onboarding-sidebar li.complete > span:first-child { color: var(--success); border-color: rgba(110, 225, 182, .35); }
-.onboarding-credit { margin-top: auto; color: var(--text-soft); font-family: "Newsreader", Georgia, serif; font-size: 15px; text-decoration: none; }
+.onboarding-mascot { width: 170px; height: 170px; margin: auto auto 18px; object-fit: contain; }
+.onboarding-credit { color: var(--text-soft); font-family: "Newsreader", Georgia, serif; font-size: 15px; text-decoration: none; }
 .onboarding-main { min-width: 0; display: flex; flex-direction: column; }
 .onboarding-content { flex: 1; overflow-x: hidden; overflow-y: auto; padding: 58px 64px 36px; }
 .onboarding-actions { min-height: 76px; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--window-muted); border-top: 1px solid var(--line); }
@@ -536,6 +537,7 @@ h1, h2, h3, .brand-name, .store-name {
   .onboarding-sidebar ol { margin: 18px 0 0; display: flex; overflow-x: auto; }
   .onboarding-sidebar li { flex: 0 0 auto; }
   .onboarding-sidebar li > span:last-child { display: none; }
+  .onboarding-mascot { display: none; }
   .onboarding-credit { display: none; }
   .onboarding-content { padding: 30px 20px 24px; }
   .setup-page-header h2 { font-size: 28px; }

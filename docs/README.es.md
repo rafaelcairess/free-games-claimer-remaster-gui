@@ -1,16 +1,16 @@
 <p align="center">
-  <img src="images/claimer-control-logo.png" alt="Claimer Control" width="128" height="128">
+  <img src="images/lontrium-logo.png" alt="Lontrium Control" width="128" height="128">
 </p>
 
-<h1 align="center">Claimer Control</h1>
+<h1 align="center">Lontrium Control</h1>
 
 <p align="center">
   <strong>Tus juegos gratuitos y recompensas diarias en un panel local y privado.</strong><br>
-  Instálalo una vez, elige tus tiendas y deja que Claimer Control se ocupe de la rutina.
+  Instálalo una vez, elige tus tiendas y deja que Lontrium Control se ocupe de la rutina.
 </p>
 
 <p align="center">
-  <a href="../LICENSE"><img alt="Licencia AGPL-3.0" src="https://img.shields.io/github/license/rafaelcairess/free-games-claimer-remaster-gui?style=for-the-badge"></a>
+  <a href="../LICENSE"><img alt="Licencia AGPL-3.0" src="https://img.shields.io/github/license/rafaelcairess/lontrium?style=for-the-badge"></a>
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white">
@@ -23,14 +23,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases"><strong>Descargar Claimer Control para Windows</strong></a>
+  <a href="https://github.com/rafaelcairess/lontrium/releases"><strong>Descargar Lontrium Control para Windows</strong></a>
 </p>
 
 > [!NOTE]
 > El instalador para Windows estará disponible en Releases con la versión `v1.0.0`. Hasta que se publique, este repositorio contiene la versión de desarrollo.
 
 <p align="center">
-  <img src="images/05-dashboard.png" alt="Panel de Claimer Control con resultados de juegos y AliExpress" width="1100">
+  <img src="images/05-dashboard.png" alt="Panel de Lontrium Control con resultados de juegos y AliExpress" width="1100">
 </p>
 
 ## Qué hace
@@ -52,7 +52,7 @@ GamerPower también puede enviar promociones compatibles de Fanatical, itch.io e
 
 ## Instálalo en tres pasos
 
-1. Descarga `Claimer-Control-Setup.exe` desde la [Release más reciente](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases).
+1. Descarga `Lontrium-Setup.exe` desde la [Release más reciente](https://github.com/rafaelcairess/lontrium/releases).
 2. Ejecuta el instalador. Si falta Docker Desktop, el launcher explica por qué es necesario y solo lo instala desde la fuente oficial después de tu confirmación.
 3. Sigue el asistente local: elige idioma y tiendas, añade credenciales si lo deseas y configura el horario.
 
@@ -62,7 +62,7 @@ El instalador puede solicitar permisos de administrador o reiniciar Windows mien
 
 ## Tus datos permanecen en tu computadora
 
-Claimer Control no tiene un servidor de cuentas ni incluye telemetría.
+Lontrium Control no tiene un servidor de cuentas ni incluye telemetría.
 
 | Qué sucede | Dónde sucede |
 |---|---|
@@ -73,7 +73,7 @@ Claimer Control no tiene un servidor de cuentas ni incluye telemetría.
 | Respuesta de la API sobre secretos | Solo `configured: true/false`; la contraseña nunca vuelve al panel |
 | Actualizaciones | Se consultan en las Releases oficiales de este proyecto en GitHub |
 
-Las credenciales son opcionales y el acceso manual mediante el navegador siempre está disponible. Los secretos locales no están protegidos por un servidor externo de cifrado; protege tu cuenta de Windows y el disco. Claimer Control no intenta eludir CAPTCHA, sistemas antifraude ni desafíos de seguridad.
+Las credenciales son opcionales y el acceso manual mediante el navegador siempre está disponible. Los secretos locales no están protegidos por un servidor externo de cifrado; protege tu cuenta de Windows y el disco. Lontrium Control no intenta eludir CAPTCHA, sistemas antifraude ni desafíos de seguridad.
 
 ## Diseñado para ser claro
 
@@ -95,13 +95,13 @@ Cada credencial tiene una explicación accesible en el botón `?`. La interfaz f
 
 ## Uso diario
 
-- Abre **Claimer Control** desde el menú Inicio o el acceso directo del escritorio.
+- Abre **Lontrium Control** desde el menú Inicio o el acceso directo del escritorio.
 - Usa **Ejecutar ahora** para todas las tiendas o ejecuta una tienda individualmente.
 - Usa **Navegador** cuando una tienda solicite acceso, CAPTCHA o confirmación manual.
 - Usa **Configuración** para cambiar tiendas, cuentas, notificaciones y horarios.
 - Las actualizaciones se ofrecen en el panel y conservan el volumen local.
 
-El launcher comprueba Docker, inicia el servicio, espera al panel y lo abre automáticamente. Al desinstalar Claimer Control se conservan las cuentas y sesiones por defecto; borrar los datos locales es una opción separada y explícita. Docker Desktop nunca se elimina automáticamente.
+El launcher comprueba Docker, inicia el servicio, espera al panel y lo abre automáticamente. Al desinstalar Lontrium Control se conservan las cuentas y sesiones por defecto; borrar los datos locales es una opción separada y explícita. Docker Desktop nunca se elimina automáticamente.
 
 ## ¿Necesitas ayuda?
 
@@ -112,7 +112,7 @@ El launcher comprueba Docker, inicia el servicio, espera al panel y lo abre auto
 | Una sesión caducó | Inicia sesión otra vez mediante el navegador visual; la sesión actualizada se conservará localmente. |
 | Un reclamo falló | Vuelve a ejecutar únicamente esa tienda y adjunta el fragmento relevante del registro sanitizado al abrir una issue. |
 
-Para informar errores o sugerir funciones, usa las [Issues de GitHub](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/issues). Nunca publiques contraseñas, cookies, claves TOTP, capturas completas de red ni imágenes sin sanitizar.
+Para informar errores o sugerir funciones, usa las [Issues de GitHub](https://github.com/rafaelcairess/lontrium/issues). Nunca publiques contraseñas, cookies, claves TOTP, capturas completas de red ni imágenes sin sanitizar.
 
 ## Para contribuidores
 
@@ -126,7 +126,7 @@ Las pruebas cubren los módulos de tiendas, la API local, la protección de secr
 
 ## Créditos y licencia
 
-**Interfaz y distribución para Windows de Claimer Control:** [Rafael Caires](https://github.com/rafaelcairess).
+**Interfaz y distribución para Windows de Lontrium Control:** [Rafael Caires](https://github.com/rafaelcairess).
 
 Construido sobre [P-Adamiec/Free-Games-Claimer-Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster), mantenido por Paweł Adamiec y sus contribuidores. Ese proyecto fue inspirado por [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). Los avisos de terceros se encuentran en [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
 

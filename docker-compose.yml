@@ -4,7 +4,7 @@ services:
   # ---------------------------------------------------------------
   app:
     # Pin CLAIMER_TAG to a Release for reproducible installs; source users may use latest.
-    image: ghcr.io/rafaelcairess/free-games-claimer-remaster-gui:${CLAIMER_TAG:-latest}
+    image: ghcr.io/rafaelcairess/lontrium:${CLAIMER_TAG:-latest}
     container_name: fgc-remaster
     build: .
     restart: unless-stopped

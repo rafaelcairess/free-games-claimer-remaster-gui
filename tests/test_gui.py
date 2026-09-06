@@ -207,12 +207,16 @@ def test_dashboard_http_api_and_csrf():
             assert response.headers.get_content_type() == "image/svg+xml"
             assert response.read().startswith(b"<svg")
 
+        with urlopen(f"{base}/assets/icons/lontrium.png", timeout=3) as response:
+            assert response.headers.get_content_type() == "image/png"
+            assert response.read().startswith(b"\x89PNG")
+
         with urlopen(f"{base}/assets/fonts/newsreader-latin.woff2", timeout=3) as response:
             assert response.headers.get_content_type() == "font/woff2"
             assert response.read(4) == b"wOF2"
 
         with urlopen(f"{base}/assets/locales/es.json", timeout=3) as response:
-            assert json.load(response)["app"]["title"] == "Claimer Control"
+            assert json.load(response)["app"]["title"] == "Lontrium Control"
 
         with urlopen(f"{base}/api/update", timeout=3) as response:
             assert json.load(response)["currentVersion"] == "1.0.0"
@@ -259,9 +263,10 @@ def test_frontend_is_local_and_contains_store_controls():
     script = (static / "app.js").read_text(encoding="utf-8")
 
     assert "__FGC_TOKEN__" in html
-    assert "Claimer Control" in html
-    assert "/assets/icons/claimer-control.png" in html
-    assert '"/assets/icons/claimer-control.png"' in (
+    assert "Lontrium Control" in html
+    assert "/assets/icons/lontrium.png" in html
+    assert "onboarding-mascot" in html
+    assert '"/assets/icons/lontrium.png"' in (
         Path(__file__).resolve().parent.parent / "src" / "gui" / "server.py"
     ).read_text(encoding="utf-8")
     assert "data-i18n=\"dashboard.runNow\"" in html
@@ -272,6 +277,7 @@ def test_frontend_is_local_and_contains_store_controls():
     assert "/api/config" in script
     assert "/api/setup" in script
     assert "/api/update" in script
+    assert "lontrium://update" in script
     assert "'aliexpress'" in script
     assert "Unity" in (static / "locales" / "en.json").read_text(encoding="utf-8")
     assert "filter(store => store.enabled)" in script

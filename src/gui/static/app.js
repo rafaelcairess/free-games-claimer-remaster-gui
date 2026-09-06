@@ -696,7 +696,7 @@ function launchUpdater() {
   if (!latestUpdate?.available) return;
   if (window.confirm(t('update.confirm', {version: latestUpdate.latestVersion}))) {
     if (/Windows/i.test(navigator.userAgent)) {
-      window.location.href = 'claimer-control://update';
+      window.location.href = 'lontrium://update';
     } else if (latestUpdate.releaseUrl) {
       window.open(latestUpdate.releaseUrl, '_blank', 'noopener');
     }

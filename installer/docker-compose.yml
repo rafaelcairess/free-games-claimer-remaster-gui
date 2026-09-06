@@ -2,7 +2,7 @@ name: claimer-control
 
 services:
   app:
-    image: ghcr.io/rafaelcairess/free-games-claimer-remaster-gui:${CLAIMER_TAG:-latest}
+    image: ghcr.io/rafaelcairess/lontrium:${CLAIMER_TAG:-latest}
     container_name: claimer-control
     restart: unless-stopped
     mem_limit: ${CLAIMER_MEMORY_LIMIT:-2g}

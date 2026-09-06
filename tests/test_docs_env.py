@@ -67,7 +67,8 @@ class TestProductReadme:
         assert not re.search(r"^\|\s*`[A-Z_0-9]+`", README, re.M)
 
     def test_product_promises_and_attribution_remain_visible(self):
-        assert "Claimer-Control-Setup.exe" in README
+        assert "Lontrium-Setup.exe" in README
+        assert "rafaelcairess/lontrium" in README
         assert "Your data stays local" in README
         assert "P-Adamiec/Free-Games-Claimer-Remaster" in README
         assert "GNU Affero General Public License v3.0" in README

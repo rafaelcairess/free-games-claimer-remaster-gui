@@ -1,16 +1,16 @@
 <p align="center">
-  <img src="docs/images/claimer-control-logo.png" alt="Claimer Control" width="128" height="128">
+  <img src="docs/images/lontrium-logo.png" alt="Lontrium Control" width="128" height="128">
 </p>
 
-<h1 align="center">Claimer Control</h1>
+<h1 align="center">Lontrium Control</h1>
 
 <p align="center">
   <strong>Your free-game claims and daily rewards, organized in one private local dashboard.</strong><br>
-  Install once, choose your stores, and let Claimer Control handle the routine.
+  Install once, choose your stores, and let Lontrium Control handle the routine.
 </p>
 
 <p align="center">
-  <a href="./LICENSE"><img alt="License AGPL-3.0" src="https://img.shields.io/github/license/rafaelcairess/free-games-claimer-remaster-gui?style=for-the-badge"></a>
+  <a href="./LICENSE"><img alt="License AGPL-3.0" src="https://img.shields.io/github/license/rafaelcairess/lontrium?style=for-the-badge"></a>
   <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white">
@@ -23,14 +23,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases"><strong>Download Claimer Control for Windows</strong></a>
+  <a href="https://github.com/rafaelcairess/lontrium/releases"><strong>Download Lontrium Control for Windows</strong></a>
 </p>
 
 > [!NOTE]
 > The Windows installer will be available on the Releases page with `v1.0.0`. Until that Release is published, this repository contains the development version.
 
 <p align="center">
-  <img src="docs/images/05-dashboard.png" alt="Claimer Control dashboard showing game and AliExpress results" width="1100">
+  <img src="docs/images/05-dashboard.png" alt="Lontrium Control dashboard showing game and AliExpress results" width="1100">
 </p>
 
 ## What it does
@@ -52,7 +52,7 @@ GamerPower can also route compatible giveaways from Fanatical, itch.io and Indie
 
 ## Install in three steps
 
-1. Download `Claimer-Control-Setup.exe` from the [latest Release](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/releases).
+1. Download `Lontrium-Setup.exe` from the [latest Release](https://github.com/rafaelcairess/lontrium/releases).
 2. Run it. If Docker Desktop is missing, the launcher explains why it is needed and installs it from Docker's official source only after your confirmation.
 3. Follow the local setup assistant: choose a language, select your stores, optionally add credentials, and define the schedule.
 
@@ -62,7 +62,7 @@ The installer may request administrator permission or a Windows restart while Do
 
 ## Your data stays local
 
-Claimer Control has no account server and includes no telemetry.
+Lontrium Control has no account server and includes no telemetry.
 
 | What happens | Where it happens |
 |---|---|
@@ -73,7 +73,7 @@ Claimer Control has no account server and includes no telemetry.
 | Saved secret API response | Only `configured: true/false`; the password is never sent back to the dashboard |
 | Updates | Checked against this project's official GitHub Releases |
 
-Credentials are optional; manual browser login is always available. Locally saved secrets are not protected by an external encryption server, so your Windows account and disk must remain secure. Claimer Control never attempts to bypass CAPTCHA, anti-fraud or security challenges.
+Credentials are optional; manual browser login is always available. Locally saved secrets are not protected by an external encryption server, so your Windows account and disk must remain secure. Lontrium Control never attempts to bypass CAPTCHA, anti-fraud or security challenges.
 
 ## Designed for clarity
 
@@ -95,13 +95,13 @@ Every credential field includes an accessible `?` explanation. The interface sup
 
 ## Daily use
 
-- Open **Claimer Control** from the Start menu or desktop shortcut.
+- Open **Lontrium Control** from the Start menu or desktop shortcut.
 - Use **Run now** for all enabled stores or run one store individually.
 - Use **Browser** when a store asks for login, CAPTCHA or manual confirmation.
 - Use **Settings** to change stores, accounts, notifications or scheduling.
 - Updates are offered in the dashboard and preserve the local volume.
 
-The Windows launcher checks Docker, starts the service, waits for the dashboard and opens it automatically. Uninstalling Claimer Control keeps accounts and sessions by default; deleting local data is a separate, explicit option. Docker Desktop is never removed automatically.
+The Windows launcher checks Docker, starts the service, waits for the dashboard and opens it automatically. Uninstalling Lontrium Control keeps accounts and sessions by default; deleting local data is a separate, explicit option. Docker Desktop is never removed automatically.
 
 ## Need help?
 
@@ -112,7 +112,7 @@ The Windows launcher checks Docker, starts the service, waits for the dashboard 
 | A session expired | Sign in again through the visual browser; the refreshed session is kept locally. |
 | A claim failed | Retry the individual store and include the relevant sanitized log when opening an issue. |
 
-For bugs and feature requests, use [GitHub Issues](https://github.com/rafaelcairess/free-games-claimer-remaster-gui/issues). Never publish passwords, cookies, TOTP keys, complete network captures or unsanitized screenshots.
+For bugs and feature requests, use [GitHub Issues](https://github.com/rafaelcairess/lontrium/issues). Never publish passwords, cookies, TOTP keys, complete network captures or unsanitized screenshots.
 
 ## For contributors
 
@@ -126,7 +126,7 @@ The test suite covers store logic, the local API, secret handling, translations,
 
 ## Credits and license
 
-**Claimer Control interface and Windows distribution:** [Rafael Caires](https://github.com/rafaelcairess).
+**Lontrium Control interface and Windows distribution:** [Rafael Caires](https://github.com/rafaelcairess).
 
 Built on [P-Adamiec/Free-Games-Claimer-Remaster](https://github.com/P-Adamiec/Free-Games-Claimer-Remaster), maintained by Paweł Adamiec and its contributors. That project was inspired by [vogler/free-games-claimer](https://github.com/vogler/free-games-claimer). Third-party notices are listed in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
 
