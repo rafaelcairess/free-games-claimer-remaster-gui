@@ -215,6 +215,50 @@ function createAddStoreRow(availableCount) {
   return button;
 }
 
+function renderHistory(status) {
+  const container = document.querySelector('#historyList');
+  const records = Array.isArray(status.history) ? status.history.slice(0, 50) : [];
+  const stores = new Map(status.stores.map(store => [store.key, store]));
+  if (!records.length) {
+    const empty = document.createElement('p');
+    empty.className = 'history-empty';
+    empty.textContent = t('history.empty');
+    container.replaceChildren(empty);
+    return;
+  }
+  const cards = records.map(record => {
+    const store = stores.get(record.store) || {key: record.store, name: record.store, badge: '?'};
+    const card = document.createElement('article');
+    card.className = 'history-card';
+    card.dataset.state = record.state;
+    const header = document.createElement('div');
+    header.className = 'history-card-header';
+    const identity = document.createElement('div');
+    identity.className = 'store-identity';
+    const name = document.createElement('strong');
+    name.className = 'history-store-name';
+    name.textContent = store.name;
+    identity.append(createStoreIcon(store), name);
+    const summary = document.createElement('div');
+    summary.className = 'history-summary';
+    const message = document.createElement('strong');
+    message.textContent = t(record.messageKey || 'status.completedNoChanges');
+    const timestamp = document.createElement('time');
+    timestamp.dateTime = record.finishedAt || '';
+    timestamp.textContent = relativeTime(record.finishedAt);
+    summary.append(message, timestamp);
+    header.append(identity, summary);
+    card.append(header);
+    const details = createStoreDetails(record.details);
+    if (details) {
+      details.classList.add('history-details');
+      card.append(details);
+    }
+    return card;
+  });
+  container.replaceChildren(...cards);
+}
+
 function renderStatus(status) {
   latestStatus = status;
   const enabledStores = status.stores.filter(store => store.enabled);
@@ -225,6 +269,7 @@ function renderStatus(status) {
   document.querySelector('#runLabel').textContent = t(status.running ? 'dashboard.running' : 'dashboard.ready');
   document.querySelector('#runPill').classList.toggle('running', status.running);
   document.querySelector('#runAllButton').disabled = status.running || enabledStores.length === 0;
+  renderHistory(status);
 }
 
 async function refreshStatus(silent = true) {

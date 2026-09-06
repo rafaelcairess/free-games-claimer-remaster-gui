@@ -49,7 +49,7 @@ Name: "autostart"; Description: "{cm:AutoStartTask}"; GroupDescription: "{cm:Aut
 Source: "Start-ClaimerControl.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Start-ClaimerControl.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "docker-compose.yml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "claimer.env"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "claimer.env"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Claimer Control"; Filename: "{app}\Start-ClaimerControl.cmd"; WorkingDir: "{app}"

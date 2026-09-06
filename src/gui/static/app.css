@@ -276,6 +276,17 @@ h1, h2, h3, .brand-name, .store-name {
 .add-copy strong { font-family: "Newsreader", Georgia, serif; color: var(--text-soft); font-size: 16px; font-weight: 600; }
 .add-copy small { color: var(--muted); font-size: 10px; margin-top: 3px; }
 
+.history-section { margin-top: 42px; }
+.history-list { display: grid; gap: 10px; }
+.history-card { padding: 14px 18px; background: var(--window); border: 1px solid var(--line); border-radius: 11px; }
+.history-card[data-state="error"] { border-left: 3px solid var(--danger); }
+.history-card-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.history-store-name { color: var(--text); font-family: "Newsreader", Georgia, serif; font-size: 16px; font-weight: 600; }
+.history-summary { display: grid; justify-items: end; gap: 3px; color: var(--text); font-size: 11px; }
+.history-summary time { color: var(--muted); font-size: 10px; }
+.history-details { margin: 12px 0 0 53px; }
+.history-empty { margin: 0; padding: 24px; color: var(--muted); background: var(--window); border: 1px dashed var(--line-strong); border-radius: 11px; text-align: center; }
+
 .store-steam { --store-color: #62a0ea; --store-bg: rgba(98, 160, 234, .12); }
 .store-epic { --store-color: #f2f2f2; --store-bg: rgba(242, 242, 242, .08); }
 .store-fab { --store-color: #c59be8; --store-bg: rgba(197, 155, 232, .1); }
@@ -514,6 +525,9 @@ h1, h2, h3, .brand-name, .store-name {
   .store-results { align-items: flex-start; flex-direction: column; gap: 9px; margin-left: 53px; }
   .result-list li { align-items: flex-start; flex-direction: column; gap: 2px; }
   .result-title { white-space: normal; }
+  .history-card-header { align-items: flex-start; }
+  .history-summary { text-align: right; }
+  .history-details { margin-left: 53px; }
   .settings-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .settings-nav { display: flex; overflow-x: auto; overflow-y: hidden; padding: 9px 12px; border-right: 0; border-bottom: 1px solid var(--line); }
   .settings-nav-item { width: auto; flex: 0 0 auto; padding: 0 11px; white-space: nowrap; }

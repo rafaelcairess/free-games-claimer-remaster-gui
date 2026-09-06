@@ -92,11 +92,13 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 # ── Copy the application source code into the container ──
-COPY . .
+COPY main.py docker-entrypoint.sh ./
+COPY src ./src
 
 # Fix Windows-style line endings (\r\n → \n) in shell scripts and make them executable
-RUN dos2unix ./*.sh && chmod +x ./*.sh
-RUN cp docker-entrypoint.sh /usr/local/bin/
+RUN dos2unix docker-entrypoint.sh \
+    && chmod +x docker-entrypoint.sh \
+    && cp docker-entrypoint.sh /usr/local/bin/
 
 # ── Build information (injected by CI/CD during docker build) ──
 # These variables are baked into the image so the startup banner can show

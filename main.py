@@ -28,7 +28,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from src.core.config import cfg, settings_warnings
 from src.core.claimer import mask_account
-from src.core.database import init_db
+from src.core.database import init_db, load_dashboard_history, save_dashboard_history
 from src.core.selection import apply_run_selection
 from src.core.updates import get_update_status, notify_if_update_available
 from src.stores.aliexpress import claim_aliexpress
@@ -307,6 +307,16 @@ def _print_banner() -> None:
 # Orchestration
 # ---------------------------------------------------------------------------
 
+async def _persist_dashboard_result(record: dict | None) -> None:
+    """Save dashboard history without allowing UI storage to break a claim run."""
+    if record is None:
+        return
+    try:
+        await save_dashboard_history(record)
+    except Exception:
+        logger.exception("Could not save dashboard history for %s", record.get("store"))
+
+
 async def run_claimers(requested_stores: list[str] | None = None) -> None:
     """Run selected claimers sequentially (they each open their own browser)."""
     claimers = _get_active_claimers(requested_stores)
@@ -336,10 +346,12 @@ async def run_claimers(requested_stores: list[str] | None = None) -> None:
             if isinstance(res, dict) and res.get("games"):
                 aggregated_results.append(res)
             message, details = summarize_store_result(store_key, res)
-            dashboard_state.finish_store(store_key, message, details=details)
+            record = dashboard_state.finish_store(store_key, message, details=details)
+            await _persist_dashboard_result(record)
         except Exception:
             logger.exception("✗ %s crashed", name)
-            dashboard_state.finish_store(store_key, "Falha na última execução", failed=True)
+            record = dashboard_state.finish_store(store_key, "Falha na última execução", failed=True)
+            await _persist_dashboard_result(record)
             if cfg.store_notify_enabled(_store_key(name)):
                 await notify(f"{name} claimer crashed with an unhandled exception. Check logs.")
 
@@ -490,6 +502,10 @@ async def main() -> None:
     _warn_about_settings()
     await init_db()
     logger.info("Database ready.")
+    try:
+        dashboard_state.restore(await load_dashboard_history())
+    except Exception:
+        logger.exception("Could not restore dashboard history; starting with an empty dashboard.")
 
     if cfg.reset_db_games:
         try:

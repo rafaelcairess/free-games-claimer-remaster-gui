@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "requirements.txt"
+      - "requirements-dev.txt"
       - "Dockerfile"
       - ".github/dependabot.yml"
       - ".github/workflows/dependency-check.yml"
@@ -14,6 +15,7 @@ on:
       - dev
     paths:
       - "requirements.txt"
+      - "requirements-dev.txt"
       - "Dockerfile"
       - ".github/dependabot.yml"
       - ".github/workflows/dependency-check.yml"

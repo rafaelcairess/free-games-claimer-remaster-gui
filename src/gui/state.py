@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime, timezone
 from threading import Lock
+from uuid import uuid4
 
 
 STORE_META = {
@@ -107,8 +108,10 @@ class DashboardState:
     def __init__(self) -> None:
         self._lock = Lock()
         self._running = False
+        self._run_id: str | None = None
         self._started_at: str | None = None
         self._finished_at: str | None = None
+        self._history: list[dict] = []
         self._stores = {
             key: {
                 **meta,
@@ -125,6 +128,7 @@ class DashboardState:
     def begin_run(self, store_keys: list[str]) -> None:
         with self._lock:
             self._running = True
+            self._run_id = uuid4().hex
             self._started_at = _now()
             for key in store_keys:
                 if key in self._stores:
@@ -147,27 +151,67 @@ class DashboardState:
         failed: bool = False,
         details: dict | None = None,
         message_key: str | None = None,
-    ) -> None:
+    ) -> dict | None:
         with self._lock:
             if key in self._stores:
+                finished_at = _now()
+                resolved_key = message_key or (
+                    "status.failed" if failed else (
+                        "status.resultCoins" if details and details.get("kind") == "coins" else
+                        "status.resultGames" if details and details.get("kind") == "games" else
+                        "status.completedNoChanges"
+                    )
+                )
                 self._stores[key].update(
                     state="error" if failed else "success",
                     message=message,
-                    messageKey=message_key or (
-                        "status.failed" if failed else (
-                            "status.resultCoins" if details and details.get("kind") == "coins" else
-                            "status.resultGames" if details and details.get("kind") == "games" else
-                            "status.completedNoChanges"
-                        )
-                    ),
-                    lastRun=_now(),
+                    messageKey=resolved_key,
+                    lastRun=finished_at,
                     details=deepcopy(details),
                 )
+                record = {
+                    "runId": self._run_id or uuid4().hex,
+                    "store": key,
+                    "state": "error" if failed else "success",
+                    "message": message,
+                    "messageKey": resolved_key,
+                    "startedAt": self._started_at or finished_at,
+                    "finishedAt": finished_at,
+                    "details": deepcopy(details),
+                }
+                self._history.insert(0, deepcopy(record))
+                del self._history[250:]
+                return record
+            return None
 
     def finish_run(self) -> None:
         with self._lock:
             self._running = False
             self._finished_at = _now()
+
+    def restore(self, records: list[dict]) -> None:
+        """Restore recent safe results loaded from the persistent database."""
+        with self._lock:
+            safe_records = []
+            restored_stores = set()
+            for record in records[:250]:
+                if not isinstance(record, dict) or record.get("store") not in self._stores:
+                    continue
+                if record.get("state") not in {"success", "error"}:
+                    continue
+                safe_records.append(deepcopy(record))
+                key = record["store"]
+                if key not in restored_stores:
+                    self._stores[key].update(
+                        state=record["state"],
+                        message=record.get("message") or "",
+                        messageKey=record.get("messageKey") or "status.completedNoChanges",
+                        lastRun=record.get("finishedAt"),
+                        details=deepcopy(record.get("details")),
+                    )
+                    restored_stores.add(key)
+            self._history = safe_records
+            self._finished_at = safe_records[0].get("finishedAt") if safe_records else None
 
     def snapshot(self, enabled: list[str], schedule: dict | None = None) -> dict:
         with self._lock:
@@ -177,6 +221,7 @@ class DashboardState:
                 "startedAt": self._started_at,
                 "finishedAt": self._finished_at,
                 "stores": stores,
+                "history": deepcopy(self._history),
             }
         enabled_set = set(enabled)
         for store in payload["stores"]:

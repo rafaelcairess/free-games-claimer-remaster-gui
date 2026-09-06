@@ -104,6 +104,7 @@ def test_dashboard_state_only_exposes_safe_result_details():
     payload = state.snapshot(["aliexpress"], {"nextRun": None})
     ali = next(store for store in payload["stores"] if store["key"] == "aliexpress")
     assert payload["running"] is False
+    assert len(payload["history"]) == 1
     assert ali["state"] == "success"
     assert ali["enabled"] is True
     assert ali["details"] == {"kind": "coins", "claimedCoins": 15, "balance": 120}
@@ -275,6 +276,8 @@ def test_frontend_is_local_and_contains_store_controls():
     assert "help-tooltip" in script
     assert "result-outcome" in script
     assert "storeManagerForm" in html
+    assert "historyList" in html
+    assert "renderHistory(status)" in script
     assert "/assets/icons/aliexpress.svg" in (
         static / "app.css"
     ).read_text(encoding="utf-8")

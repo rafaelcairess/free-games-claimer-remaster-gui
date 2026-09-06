@@ -64,6 +64,7 @@ Claimer Control has no account server and includes no telemetry.
 |---|---|
 | Dashboard and settings | On `127.0.0.1`, available only from this computer |
 | Credentials and browser sessions | In the local Docker volume |
+| Sanitized run history | In the local SQLite database for 90 days |
 | Store login | Directly between the automated browser and the store's official website |
 | Saved secret API response | Only `configured: true/false`; the password is never sent back to the dashboard |
 | Updates | Checked against this project's official GitHub Releases |

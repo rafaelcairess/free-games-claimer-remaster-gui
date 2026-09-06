@@ -2,7 +2,7 @@ name: claimer-control
 
 services:
   app:
-    image: ghcr.io/rafaelcairess/free-games-claimer-remaster-gui:${CLAIMER_TAG:-v1.0.0}
+    image: ghcr.io/rafaelcairess/free-games-claimer-remaster-gui:${CLAIMER_TAG:-latest}
     container_name: claimer-control
     restart: unless-stopped
     tty: true

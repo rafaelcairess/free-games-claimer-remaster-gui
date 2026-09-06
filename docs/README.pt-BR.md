@@ -64,6 +64,7 @@ O Claimer Control não possui servidor de contas e não inclui telemetria.
 |---|---|
 | Painel e configurações | Em `127.0.0.1`, acessível somente neste computador |
 | Credenciais e sessões | No volume Docker local |
+| Histórico sanitizado de execuções | No banco SQLite local por 90 dias |
 | Login nas lojas | Diretamente entre o navegador automatizado e o site oficial da loja |
 | Resposta da API sobre segredos | Somente `configured: true/false`; a senha nunca retorna ao painel |
 | Atualizações | Consultadas nas Releases oficiais deste projeto no GitHub |

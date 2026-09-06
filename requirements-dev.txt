@@ -1,0 +1,4 @@
+-r requirements.txt
+
+# Development and test dependencies (not installed in the runtime image)
+pytest>=9.1.1
