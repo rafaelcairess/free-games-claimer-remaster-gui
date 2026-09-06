@@ -23,11 +23,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/rafaelcairess/lontrium/releases"><strong>Descargar Lontrium Control para Windows</strong></a>
+  <a href="https://github.com/rafaelcairess/lontrium/releases/latest/download/Lontrium-Setup.exe"><strong>Descargar Lontrium Control para Windows</strong></a>
 </p>
 
 > [!NOTE]
-> El instalador para Windows estará disponible en Releases con la versión `v1.0.0`. Hasta que se publique, este repositorio contiene la versión de desarrollo.
+> **Lontrium Control v1.0.0 ya está disponible.** Descarga el instalador de arriba y verifícalo con [`SHA256SUMS.txt`](https://github.com/rafaelcairess/lontrium/releases/latest/download/SHA256SUMS.txt).
 
 <p align="center">
   <img src="images/05-dashboard.png" alt="Panel de Lontrium Control con resultados de juegos y AliExpress" width="1100">
